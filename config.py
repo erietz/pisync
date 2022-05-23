@@ -8,10 +8,11 @@ class Config:
         self,
         source_dir: Path,
         backup_dir: Path,
-        exclude_file_patterns: list[str],
+        exclude_file_patterns: list[str] = None
     ):
         self.source_dir = self._validate_dir(source_dir)
         self.backup_dir = self._validate_dir(backup_dir)
+        self.link_dir = self.backup_dir / "latest"
         self.exclude_file_patterns = exclude_file_patterns
         self._optionless_rsync_arguments = [
             "--delete",     # delete extraneous files from dest dirs
@@ -33,13 +34,14 @@ class Config:
 
     def get_rsync_command(self, time_stamp: str) -> list[str]:
         source = str(self.source_dir)
-        destination = str(self.backup_dir)
-        link_dest = str(self.backup_dir / "latest")
+        destination = str(self.backup_dir / time_stamp)
+        link_dest = str(self.link_dir)
 
         option_arguments = []
         option_arguments.append(f"--link-dest={link_dest}")
-        for pattern in self.exclude_file_patterns:
-            option_arguments.append(f"--exclude={pattern}")
+        if self.exclude_file_patterns is not None:
+            for pattern in self.exclude_file_patterns:
+                option_arguments.append(f"--exclude={pattern}")
 
         return [
             "rsync",
