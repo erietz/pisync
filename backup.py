@@ -1,7 +1,11 @@
 """
 Author      : Ethan Rietz
 Date        : 2022-05-23
-Description : Incremental backups script using rsync
+Description : Incremental backups script using rsync.
+
+Notes:
+
+https://linuxconfig.org/how-to-create-incremental-backups-using-rsync-on-linux
 """
 
 import subprocess
