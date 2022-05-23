@@ -24,7 +24,7 @@ def main(config: Config):
     rsync_command = config.get_rsync_command(time_stamp)
     exit_code = run_backup(rsync_command)
 
-    latest_backup_path = config.backup_dir / time_stamp
+    latest_backup_path = config.destination_dir / time_stamp
 
     if exit_code == 0:
         if config.link_dir.exists():
