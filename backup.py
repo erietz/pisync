@@ -24,15 +24,16 @@ def main(config: Config):
     rsync_command = config.get_rsync_command(time_stamp)
     exit_code = run_backup(rsync_command)
 
+    latest_backup_path = config.backup_dir / time_stamp
+
     if exit_code == 0:
         if config.link_dir.exists():
             config.link_dir.unlink()
-        backup_path = config.backup_dir / time_stamp
-        config.link_dir.symlink_to(backup_path)
+        config.link_dir.symlink_to(latest_backup_path)
     else:
         # backup failed, we should delete the most recent backup
-        if backup_path.exists():
-            shutil.rmtree(backup_path)
+        if latest_backup_path.exists():
+            shutil.rmtree(latest_backup_path)
 
 
 def enforce_system_requirements() -> None:
