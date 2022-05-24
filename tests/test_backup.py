@@ -1,105 +1,21 @@
+from time import sleep
 import unittest
-from unittest.main import main
-from backup import backup, get_time_stamp, run_rsync
-from config import Config, InvalidPath
+import tempfile
 from pathlib import Path
 
+from backup import backup, run_rsync, directory_is_empty
+from config import Config
 
-class ConfigTests(unittest.TestCase):
-    def test_init_valid_parameters(self):
-        # arrange
-        home = str(Path("~/").expanduser())
-        tmp = "/tmp"
 
-        # act
-        config = Config(home, tmp)
+class UtilityFunctionTests(unittest.TestCase):
+    def test_directory_is_empty(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_dir = Path(tmp)
+            self.assertTrue(directory_is_empty(tmp_dir))
 
-        # assert
-        self.assertEqual(str(config.source_dir), home)
-        self.assertEqual(str(config.destination_dir), tmp)
-        self.assertEqual(str(config.link_dir), tmp + "/" + "latest")
-
-    def test_init_source_does_not_exist(self):
-        # arrange
-        source = "/bad/directory/path/here/does/not/exist"
-        dest = "/tmp"
-
-        # act + assert
-        with self.assertRaises(InvalidPath):
-            config = Config(source, dest)
-
-    def test_init_destination_does_not_exist(self):
-        # arrange
-        source = str(Path("~/").expanduser())
-        dest = "/bad/directory/path/here/does/not/exist"
-
-        # act + assert
-        with self.assertRaises(InvalidPath):
-            _ = Config(source, dest)
-
-    def test_get_rsync_command_no_exclude_patterns(self):
-        # arrange
-        home = str(Path("~/").expanduser())
-        tmp = "/tmp"
-        config = Config(home, tmp)
-        time_stamp = get_time_stamp()
-
-        # act
-        cmd = config.get_rsync_command(time_stamp)
-
-        # assert
-        self.assertEqual(cmd[0], "rsync")
-        self.assertIn(home, cmd)
-        self.assertIn(f"{tmp}/{time_stamp}", cmd)
-        self.assertIn(f"--link-dest={tmp}/latest", cmd)
-        optionless_rsync_arguments = [
-            "--delete",
-            "--archive",
-            "--acls",
-            "--xattrs",
-            "--verbose",
-        ]
-        for option in optionless_rsync_arguments:
-            self.assertIn(option, cmd)
-        self.assertEqual(len(cmd), len(optionless_rsync_arguments) + 4)
-
-    def test_get_rsync_command_with_exclude_patters(self):
-        # arrange
-        home = str(Path("~/").expanduser())
-        tmp = "/tmp"
-        exclude_file_patterns = [
-            "/exclude/path1",
-            "/exclude/path2",
-            "/exclude/path3/**/*.bak"
-        ]
-        config = Config(
-            home,
-            tmp,
-            exclude_file_patterns
-        )
-        time_stamp = get_time_stamp()
-
-        # act
-        cmd = config.get_rsync_command(time_stamp)
-
-        # assert
-        self.assertEqual(cmd[0], "rsync")
-        self.assertIn(home, cmd)
-        self.assertIn(f"{tmp}/{time_stamp}", cmd)
-        self.assertIn(f"--link-dest={tmp}/latest", cmd)
-        optionless_rsync_arguments = [
-            "--delete",
-            "--archive",
-            "--acls",
-            "--xattrs",
-            "--verbose",
-        ]
-        for option in optionless_rsync_arguments:
-            self.assertIn(option, cmd)
-
-        self.assertEqual(len(cmd), len(optionless_rsync_arguments) + 4 + 3)
-        for pattern in exclude_file_patterns:
-            self.assertIn(f"--exclude={pattern}", cmd)
+            new_file = tmp_dir / "new-file-name-here.txt"
+            new_file.touch()
+            self.assertFalse(directory_is_empty(tmp_dir))
 
 
 class RunRsyncTests(unittest.TestCase):
@@ -115,7 +31,42 @@ class RunRsyncTests(unittest.TestCase):
 
 
 class BackupTests(unittest.TestCase):
-    pass
+    def test_five_backups_while_adding_files_each_time_successfully(self):
+        source_dir = tempfile.TemporaryDirectory()
+        destination_dir = tempfile.TemporaryDirectory()
+        config = Config(source_dir.name, destination_dir.name)
+        source_dir_path = Path(source_dir.name)
+        dest_dir_path = Path(destination_dir.name)
+
+        for i in range(5):
+            # arrange
+            for j in range(i):
+                curr_file_path = source_dir_path / f"test{j}.txt"
+                curr_file_path.touch()
+
+            # act
+            latest_backup_path = backup(config)
+
+            # assert
+            files_in_source = list(source_dir_path.iterdir())
+            self.assertEqual(len(files_in_source), i)
+            for source_file in files_in_source:
+                dest_file = dest_dir_path / latest_backup_path / source_file
+                self.assertTrue(dest_file.exists())
+
+            latest_link = dest_dir_path / "latest"
+            self.assertTrue(latest_link.exists())
+            self.assertTrue(latest_link.is_symlink())
+            self.assertEqual(latest_link.readlink(), latest_backup_path)
+
+            sleep(2)    # next time stamp (in seconds) must be unique
+
+        # Remove all files and directories generated
+        source_dir.cleanup()
+        destination_dir.cleanup()
+
+    def test_latest_backup_contains_files_deleted_accidentally(self):
+        pass
 
 
 if __name__ == '__main__':

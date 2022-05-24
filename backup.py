@@ -12,28 +12,38 @@ import subprocess
 import sys
 import shutil
 import time
-from datetime import datetime
 from typing import List
+from pathlib import Path
 
 from config import Config
 
 
-def backup(config: Config):
+def backup(config: Config) -> Path:
+    """
+    Returns the path to the latest backup directory
+    """
     enforce_system_requirements()
-    time_stamp = get_time_stamp()
-    rsync_command = config.get_rsync_command(time_stamp)
-    exit_code = run_rsync(rsync_command)
+    latest_backup_path = config.generate_new_backup_dir_path()
 
-    latest_backup_path = config.destination_dir / time_stamp
+    prev_backup_exists = not directory_is_empty(config.destination_dir)
+
+    rsync_command = config.get_rsync_command(
+        latest_backup_path,
+        previous_backup_exists=prev_backup_exists
+    )
+
+    exit_code = run_rsync(rsync_command)
 
     if exit_code == 0:
         if config.link_dir.exists():
             config.link_dir.unlink()
         config.link_dir.symlink_to(latest_backup_path)
+        return latest_backup_path
     else:
         # backup failed, we should delete the most recent backup
         if latest_backup_path.exists():
             shutil.rmtree(latest_backup_path)
+        return None
 
 
 def enforce_system_requirements() -> None:
@@ -46,10 +56,8 @@ def enforce_system_requirements() -> None:
         sys.exit(1)
 
 
-def get_time_stamp() -> str:
-    now = datetime.now()
-    stamp = now.strftime("%Y-%m-%d-%H-%M-%S")
-    return str(stamp)
+def directory_is_empty(dir: Path) -> bool:
+    return not any(dir.iterdir())
 
 
 def run_rsync(rsync_command: List[str]) -> int:
@@ -63,8 +71,3 @@ def run_rsync(rsync_command: List[str]) -> int:
     print("Time elapsed", end_time - start_time)
 
     return process.returncode
-
-
-if __name__ == '__main__':
-    config = Config("/home/ethan/Documents", "/tmp/backup/my_implementation")
-    backup(config)

@@ -1,5 +1,5 @@
-import sys
 from pathlib import Path
+from datetime import datetime
 from typing import List
 
 
@@ -15,8 +15,8 @@ class Config:
         destination_dir: str,
         exclude_file_patterns: List[str] = None
     ):
-        self.source_dir = self._validate_dir(source_dir)
-        self.destination_dir = self._validate_dir(destination_dir)
+        self.source_dir = self.ensure_dir_exists(source_dir)
+        self.destination_dir = self.ensure_dir_exists(destination_dir)
         self.link_dir = self.destination_dir / "latest"
         self.exclude_file_patterns = exclude_file_patterns
         self._optionless_rsync_arguments = [
@@ -27,7 +27,7 @@ class Config:
             "--verbose",    # increase verbosity
         ]
 
-    def _validate_dir(self, dir: str) -> Path:
+    def ensure_dir_exists(self, dir: str) -> Path:
         dir = Path(dir)
         if not dir.exists():
             raise InvalidPath(f"{dir} does not exist")
@@ -35,13 +35,33 @@ class Config:
             raise InvalidPath(f"{dir} is not a directory")
         return dir
 
-    def get_rsync_command(self, time_stamp: str) -> List[str]:
-        source = str(self.source_dir)
-        destination = str(self.destination_dir / time_stamp)
-        link_dest = str(self.link_dir)
+    @staticmethod
+    def _get_time_stamp() -> str:
+        now = datetime.now()
+        stamp = now.strftime("%Y-%m-%d-%H-%M-%S")
+        return str(stamp)
 
+    def generate_new_backup_dir_path(self) -> Path:
+        time_stamp = self._get_time_stamp()
+        new_backup_dir = self.destination_dir / time_stamp
+        if new_backup_dir.exists():
+            raise InvalidPath(f"{dir} already exists and will get overwritten")
+        else:
+            return new_backup_dir
+
+    def get_rsync_command(
+            self,
+            new_backup_dir: Path,
+            previous_backup_exists: bool = False
+    ) -> List[str]:
+        destination = str(new_backup_dir)
+        source = str(self.source_dir)
+        link_dest = str(self.link_dir)
         option_arguments = []
-        option_arguments.append(f"--link-dest={link_dest}")
+
+        if previous_backup_exists:
+            option_arguments.append(f"--link-dest={link_dest}")
+
         if self.exclude_file_patterns is not None:
             for pattern in self.exclude_file_patterns:
                 option_arguments.append(f"--exclude={pattern}")
