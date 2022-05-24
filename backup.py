@@ -14,6 +14,7 @@ import shutil
 import time
 from datetime import datetime
 from pathlib import Path
+from typing import List
 
 from config import Config
 
@@ -37,8 +38,8 @@ def main(config: Config):
 
 
 def enforce_system_requirements() -> None:
-    if sys.version_info < (3, 9):
-        print("Pretty sure this requires python 3.9 or above", file=sys.stderr)
+    if sys.version_info < (3, 6):
+        print("Requires Python 3.6 due to f strings", file=sys.stderr)
         sys.exit(1)
 
     if shutil.which("rsync") is None:
@@ -48,11 +49,11 @@ def enforce_system_requirements() -> None:
 
 def get_time_stamp() -> str:
     now = datetime.now()
-    stamp = now.strftime("%d-%m-%Y-%H-%M-%S")
+    stamp = now.strftime("%Y-%m-%d-%H-%M-%S")
     return str(stamp)
 
 
-def run_backup(rsync_command: list[str]) -> int:
+def run_backup(rsync_command: List[str]) -> int:
     print("Running ", rsync_command)
 
     start_time = time.perf_counter()

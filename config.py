@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from typing import List
 
 
 class Config:
@@ -8,7 +9,7 @@ class Config:
         self,
         source_dir: Path,
         destination_dir: Path,
-        exclude_file_patterns: list[str] = None
+        exclude_file_patterns: List[str] = None
     ):
         self.source_dir = self._validate_dir(source_dir)
         self.destination_dir = self._validate_dir(destination_dir)
@@ -32,7 +33,7 @@ class Config:
             sys.exit(1)
         return dir
 
-    def get_rsync_command(self, time_stamp: str) -> list[str]:
+    def get_rsync_command(self, time_stamp: str) -> List[str]:
         source = str(self.source_dir)
         destination = str(self.destination_dir / time_stamp)
         link_dest = str(self.link_dir)
