@@ -13,17 +13,16 @@ import sys
 import shutil
 import time
 from datetime import datetime
-from pathlib import Path
 from typing import List
 
 from config import Config
 
 
-def main(config: Config):
+def backup(config: Config):
     enforce_system_requirements()
     time_stamp = get_time_stamp()
     rsync_command = config.get_rsync_command(time_stamp)
-    exit_code = run_backup(rsync_command)
+    exit_code = run_rsync(rsync_command)
 
     latest_backup_path = config.destination_dir / time_stamp
 
@@ -53,7 +52,7 @@ def get_time_stamp() -> str:
     return str(stamp)
 
 
-def run_backup(rsync_command: List[str]) -> int:
+def run_rsync(rsync_command: List[str]) -> int:
     print("Running ", rsync_command)
 
     start_time = time.perf_counter()
@@ -68,4 +67,4 @@ def run_backup(rsync_command: List[str]) -> int:
 
 if __name__ == '__main__':
     config = Config("/home/ethan/Documents", "/tmp/backup/my_implementation")
-    main(config)
+    backup(config)

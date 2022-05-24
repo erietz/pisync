@@ -3,12 +3,16 @@ from pathlib import Path
 from typing import List
 
 
+class InvalidPath(Exception):
+    pass
+
+
 class Config:
     """Configuration for rsync backups"""
     def __init__(
         self,
-        source_dir: Path,
-        destination_dir: Path,
+        source_dir: str,
+        destination_dir: str,
         exclude_file_patterns: List[str] = None
     ):
         self.source_dir = self._validate_dir(source_dir)
@@ -26,11 +30,9 @@ class Config:
     def _validate_dir(self, dir: str) -> Path:
         dir = Path(dir)
         if not dir.exists():
-            print(f"{dir} does not exist", file=sys.stderr)
-            sys.exit(1)
+            raise InvalidPath(f"{dir} does not exist")
         if not dir.is_dir():
-            print(f"{dir} is not a directory", file=sys.stderr)
-            sys.exit(1)
+            raise InvalidPath(f"{dir} is not a directory")
         return dir
 
     def get_rsync_command(self, time_stamp: str) -> List[str]:
