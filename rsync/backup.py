@@ -26,13 +26,7 @@ def backup(config: Config) -> Path:
     latest_backup_path = config.generate_new_backup_dir_path()
 
     prev_backup_exists = not directory_is_empty(config.destination_dir)
-    if (
-            prev_backup_exists and
-            (
-                not config.link_dir.exists() or
-                not config.link_dir.is_symlink()
-            )
-    ):
+    if prev_backup_exists and not config.link_dir.is_symlink():
         raise Exception(
             (
                 f"{config.destination_dir} exists and is not empty indicating "
