@@ -1,8 +1,9 @@
 # About
 
-I wanted incremental backups and I wanted to be convinced that they were
-working properly. It is hard to write good shell scripts so I chose to keep
-everything in python. I wanted to keep things simple so this is not a cli tool.
+- I wanted incremental backups and I wanted to be convinced that they were
+  working properly.
+- It is hard to write clean shell scripts so I chose to keep everything in
+  python.
 
 # Example Usage
 
@@ -22,7 +23,8 @@ config = Config(
 backup(config)
 ```
 
+Also see `./run_backups.py` for how I have configured things.
 
 # TODO
 
-- Add logging
+- Do I want to make this work over ssh?
