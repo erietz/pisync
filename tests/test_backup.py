@@ -31,42 +31,80 @@ class RunRsyncTests(unittest.TestCase):
 
 
 class BackupTests(unittest.TestCase):
-    def test_five_backups_while_adding_files_each_time_successfully(self):
-        source_dir = tempfile.TemporaryDirectory()
-        destination_dir = tempfile.TemporaryDirectory()
-        config = Config(source_dir.name, destination_dir.name)
-        source_dir_path = Path(source_dir.name)
-        dest_dir_path = Path(destination_dir.name)
+    def setUp(self):
+        self.src_dir = tempfile.TemporaryDirectory()
+        self.dest_dir = tempfile.TemporaryDirectory()
+        self.config = Config(self.src_dir.name, self.dest_dir.name)
+        self.src_dir_path = Path(self.src_dir.name)
+        self.dest_dir_path = Path(self.dest_dir.name)
 
+    def tearDown(self):
+        self.src_dir.cleanup()
+        self.dest_dir.cleanup()
+
+    def test_five_backups_while_adding_files_each_time_successfully(self):
         for i in range(5):
             # arrange
             for j in range(i):
-                curr_file_path = source_dir_path / f"test{j}.txt"
+                curr_file_path = self.src_dir_path / f"test{j}.txt"
                 curr_file_path.touch()
 
             # act
-            latest_backup_path = backup(config)
+            latest_backup_path = backup(self.config)
 
             # assert
-            files_in_source = list(source_dir_path.iterdir())
+            files_in_source = list(self.src_dir_path.iterdir())
             self.assertEqual(len(files_in_source), i)
             for source_file in files_in_source:
-                dest_file = dest_dir_path / latest_backup_path / source_file
+                dest_file = self.dest_dir_path/latest_backup_path/source_file
                 self.assertTrue(dest_file.exists())
 
-            latest_link = dest_dir_path / "latest"
+            latest_link = self.dest_dir_path / "latest"
             self.assertTrue(latest_link.exists())
             self.assertTrue(latest_link.is_symlink())
             self.assertEqual(latest_link.readlink(), latest_backup_path)
-
             sleep(1)    # next time stamp (in seconds) must be unique
 
-        # Remove all files and directories generated
-        source_dir.cleanup()
-        destination_dir.cleanup()
+    def test_backup_saves_accidental_file_deletion_situation(self):
+        # arrange
+        file_names = [f"test{i}.txt" for i in range(5)]
+        for name in file_names:
+            file = self.src_dir_path / name
+            file.touch()
 
-    def test_latest_backup_contains_files_deleted_accidentally(self):
-        pass
+        # act
+        first_backup_path = backup(self.config)
+        file_to_delete = self.src_dir_path / file_names[3]
+        file_to_delete.unlink()
+        sleep(1)    # cannot run two backups at same dest in same second
+        second_backup_path = backup(self.config)
+
+        # assert
+        files_in_source = list(self.src_dir_path.iterdir())
+        files_in_first_backup = list(
+            (first_backup_path / self.src_dir_path.name).iterdir()
+        )
+        files_in_second_backup = list(
+            (second_backup_path / self.src_dir_path.name).iterdir()
+        )
+
+        self.assertEqual(len(files_in_source), 4)
+        self.assertEqual(len(files_in_first_backup), 5)
+        self.assertEqual(len(files_in_second_backup), 4)
+
+        # first backup contains all five files
+        for name in file_names:
+            file = first_backup_path / self.src_dir_path.name / name
+            self.assertTrue(file.exists())
+
+        # file at index 3 (aka test3.txt) is not in source
+        self.assertNotIn(self.src_dir_path / file_names[3], files_in_source)
+
+        # file at index 3 (aka test3.txt) is not in latest backup
+        self.assertNotIn(
+            second_backup_path / self.src_dir_path.name / file_names[3],
+            files_in_second_backup
+        )
 
 
 if __name__ == '__main__':

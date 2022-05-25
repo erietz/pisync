@@ -27,13 +27,13 @@ class Config:
             "--verbose",    # increase verbosity
         ]
 
-    def ensure_dir_exists(self, dir: str) -> Path:
-        dir = Path(dir)
-        if not dir.exists():
-            raise InvalidPath(f"{dir} does not exist")
-        if not dir.is_dir():
-            raise InvalidPath(f"{dir} is not a directory")
-        return dir
+    def ensure_dir_exists(self, path: str) -> Path:
+        path = Path(path)
+        if not path.exists():
+            raise InvalidPath(f"{path} does not exist")
+        if not path.is_dir():
+            raise InvalidPath(f"{path} is not a directory")
+        return path
 
     @staticmethod
     def _get_time_stamp() -> str:
@@ -45,7 +45,9 @@ class Config:
         time_stamp = self._get_time_stamp()
         new_backup_dir = self.destination_dir / time_stamp
         if new_backup_dir.exists():
-            raise InvalidPath(f"{dir} already exists and will get overwritten")
+            raise InvalidPath(
+                f"{new_backup_dir} already exists and will get overwritten"
+            )
         else:
             return new_backup_dir
 
