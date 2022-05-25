@@ -105,7 +105,3 @@ class BackupTests(unittest.TestCase):
             second_backup_path / self.src_dir_path.name / file_names[3],
             files_in_second_backup
         )
-
-
-if __name__ == '__main__':
-    unittest.main(verbosity=3)
