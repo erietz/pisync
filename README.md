@@ -7,8 +7,8 @@ everything in python. I wanted to keep things simple so this is not a cli tool.
 # Example Usage
 
 ```Python
-from config import Config
-from backup import backup
+from rsync.config import Config
+from rsync.backup import backup
 
 config = Config(
     source_dir="/home/ethan/Documents",
