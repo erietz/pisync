@@ -3,8 +3,8 @@ import unittest
 import tempfile
 from pathlib import Path
 
-from backup import backup, run_rsync, directory_is_empty
-from config import Config
+from rsync.backup import backup, run_rsync, directory_is_empty
+from rsync.config import Config
 
 
 class UtilityFunctionTests(unittest.TestCase):
@@ -59,7 +59,7 @@ class BackupTests(unittest.TestCase):
             self.assertTrue(latest_link.is_symlink())
             self.assertEqual(latest_link.readlink(), latest_backup_path)
 
-            sleep(2)    # next time stamp (in seconds) must be unique
+            sleep(1)    # next time stamp (in seconds) must be unique
 
         # Remove all files and directories generated
         source_dir.cleanup()

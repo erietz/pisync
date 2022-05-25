@@ -1,6 +1,6 @@
 import unittest
-from config import Config, InvalidPath
 from pathlib import Path
+from rsync.config import Config, InvalidPath
 
 
 OPTIONLESS_RSYNC_ARGUMENTS = [

@@ -1,5 +1,5 @@
-from config import Config
-from backup import backup
+from rsync.config import Config
+from rsync.backup import backup
 
 # will need to be root to run rsync for a different user
 home_directories = Config(
