@@ -97,8 +97,8 @@ def enforce_system_requirements() -> None:
         sys.exit(1)
 
 
-def directory_is_empty(dir: Path) -> bool:
-    return not any(dir.iterdir())
+def directory_is_empty(path: Path) -> bool:
+    return not any(path.iterdir())
 
 
 def run_rsync(rsync_command: List[str]) -> int:
