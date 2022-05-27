@@ -39,9 +39,9 @@ Also see `./run_backups.py` for how I have configured things.
   - The contents of `source_dir` are compared to `destination_dir/latest`
     during the incremental backup and the changes are written to
     `destination_dir/<current date/time>`.
-  - Therefore, you need to ensure that `destination_dir` is empty to start
-    a fresh backup, or you can manually create the `destination_dir/latest`
-    symlink.
+  - Therefore, you need to ensure that `destination_dir` is empty which will
+    start a fresh complete backup, or you can manually create the
+    `destination_dir/latest` symlink to continue incrementally.
 
 ## Logging
 
