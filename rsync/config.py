@@ -13,12 +13,14 @@ class Config:
         self,
         source_dir: str,
         destination_dir: str,
-        exclude_file_patterns: List[str] = None
+        exclude_file_patterns: List[str] = None,
+        log_file: str = Path.home() / ".local/share/backup/rsync-backups.log"
     ):
         self.source_dir = self.ensure_dir_exists(source_dir)
         self.destination_dir = self.ensure_dir_exists(destination_dir)
-        self.link_dir = self.destination_dir / "latest"
         self.exclude_file_patterns = exclude_file_patterns
+        self.log_file = log_file
+        self.link_dir = self.destination_dir / "latest"
         self._optionless_rsync_arguments = [
             "--delete",     # delete extraneous files from dest dirs
             "--archive",    # archive mode is -rlptgoD (no -A,-X,-U,-N,-H)
