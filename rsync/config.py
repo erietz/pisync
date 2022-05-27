@@ -16,8 +16,8 @@ class Config:
         exclude_file_patterns: List[str] = None,
         log_file: str = Path.home() / ".local/share/backup/rsync-backups.log"
     ):
-        self.source_dir = self.ensure_dir_exists(source_dir)
-        self.destination_dir = self.ensure_dir_exists(destination_dir)
+        self.source_dir = self._ensure_dir_exists(source_dir)
+        self.destination_dir = self._ensure_dir_exists(destination_dir)
         self.exclude_file_patterns = exclude_file_patterns
         self.log_file = log_file
         self.link_dir = self.destination_dir / "latest"
@@ -29,7 +29,8 @@ class Config:
             "--verbose",    # increase verbosity
         ]
 
-    def ensure_dir_exists(self, path: str) -> Path:
+    @staticmethod
+    def _ensure_dir_exists(path: str) -> Path:
         path = Path(path)
         if not path.exists():
             raise InvalidPath(f"{path} does not exist")
