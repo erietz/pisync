@@ -45,8 +45,8 @@ Also see `./run_backups.py` for how I have configured things.
 
 ## Logging
 
-- A default log file will be created (if it does not exists) and appended to at
-  `~/.local/share/backup/rsync-backups.log`.
+- By default, a default log file will be created (if it does not exists) and
+  appended to at `~/.local/share/backup/rsync-backups.log`.
 - **NOTE**: If you run your script as `sudo`, the home directory of the root
   user is probably `/root` rather than your `~/` directory.
 - If you want the log file to still go the your home directory when you run as
