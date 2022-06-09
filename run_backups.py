@@ -1,8 +1,11 @@
 from rsync.config import Config
 from rsync.backup import backup
 
+
+LOG_FILE = "/home/ethan/.local/share/backup/rsync-backups.log"
+
 # will need to be root to run rsync for a different user
-home_directories = Config(
+HOME_DIRECTORIES = Config(
     source_dir="/home/",
     destination_dir="/media/backup_drive_linux/home_directory_backups/",
     exclude_file_patterns=[
@@ -10,13 +13,15 @@ home_directories = Config(
         "/home/*/.local/",          # nvim plugins and python packages are huge
         "/home/*/.npm/",            # what is the crap in here?
         "**/node_modules/",         # yikes
-    ]
+    ],
+    log_file=LOG_FILE
 )
 
-large_harddrive = Config(
+LARGE_HARDDRIVE = Config(
     source_dir="/mnt/hd2",
-    destination_dir="/media/backup_drive_linux/hd2_backups/"
+    destination_dir="/media/backup_drive_linux/hd2_backups/",
+    log_file=LOG_FILE
 )
 
-backup(home_directories)
-backup(large_harddrive)
+backup(HOME_DIRECTORIES)
+backup(LARGE_HARDDRIVE)

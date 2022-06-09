@@ -52,6 +52,8 @@ Also see `./run_backups.py` for how I have configured things.
 - If you want the log file to still go the your home directory when you run as
   root, use this `sudo -E python3 ./run_backups.py`
 - You can also specify the log file location in your `Config`.
+    - Hard coding the log file path solves some of the quirks that you can run
+      into when using a cron job.
 
 # TODO
 
