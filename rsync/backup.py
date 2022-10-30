@@ -18,17 +18,13 @@ import time
 
 from rsync.config import Config
 
-logging.basicConfig(
-    format='%(levelname)s\t%(asctime)s\t%(message)s',
-    datefmt='%m/%d/%Y %I:%M:%S %p',
-    level=logging.INFO
-)
-
 def backup(config: Config) -> Path:
     """
     Returns the path to the latest backup directory
     """
     enforce_system_requirements()
+    configure_logging(config.log_file)
+
     latest_backup_path = config.generate_new_backup_dir_path()
 
     prev_backup_exists = not directory_is_empty(config.destination_dir)
@@ -75,6 +71,20 @@ def backup(config: Config) -> Path:
             logging.info(f"Deleting failed backup at {latest_backup_path}")
             shutil.rmtree(latest_backup_path)
         return None
+
+
+def configure_logging(filename: str):
+    filename = Path(filename)
+    if not filename.parent.exists():
+        filename.parent.mkdir(parents=True)
+
+    logging.basicConfig(
+        filename=str(filename.resolve()),
+        filemode="a",
+        format='%(levelname)s\t%(asctime)s\t%(message)s',
+        datefmt='%m/%d/%Y %I:%M:%S %p',
+        level=logging.INFO
+    )
 
 
 def enforce_system_requirements() -> None:
