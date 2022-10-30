@@ -18,6 +18,7 @@ import time
 
 from rsync.config import Config
 
+
 def backup(config: Config) -> Path:
     """
     Returns the path to the latest backup directory
@@ -45,10 +46,13 @@ def backup(config: Config) -> Path:
         )
 
     if prev_backup_exists:
-        logging.info(f"Starting incremental backup from {config.link_dir.resolve()}")
+        logging.info(
+            f"Starting incremental backup from {config.link_dir.resolve()}")
     else:
         logging.info(f"No previous backup found at {config.destination_dir}")
-        logging.info(f"Starting a fresh complete backup from {config.source_dir} to {config.destination_dir}")
+        logging.info(
+            f"Starting a fresh complete backup from {config.source_dir} "
+            "to {config.destination_dir}")
 
     rsync_command = config.get_rsync_command(
         latest_backup_path,
@@ -62,7 +66,8 @@ def backup(config: Config) -> Path:
         if config.link_dir.exists():
             config.link_dir.unlink()
         config.link_dir.symlink_to(latest_backup_path)
-        logging.info(f"Symlink created from {config.link_dir} to {latest_backup_path}")
+        logging.info(
+            f"Symlink created from {config.link_dir} to {latest_backup_path}")
         return latest_backup_path
     else:
         # backup failed, we should delete the most recent backup
@@ -105,9 +110,9 @@ def run_rsync(rsync_command: List[str]) -> int:
     logging.info(f"Running {rsync_command}")
 
     start_time = time.perf_counter()
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # stdout and stderr of subprocess are not captured and therefore are still
-    # sent as streams to the same location as calling process. 
+    # sent as streams to the same location as calling process.
     #
     # TODO: Running like so will put rsync stderr into the log file which may
     # or may not be wanted:
@@ -115,7 +120,7 @@ def run_rsync(rsync_command: List[str]) -> int:
     #   `sudo python3 ./run_backups.py 2>$HOME/backups.log`
     #
     # Another solution would be to log to a file instead of stderr.
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     process = subprocess.run(rsync_command)
     end_time = time.perf_counter()
 
