@@ -1,5 +1,6 @@
 from time import sleep
 import unittest
+import os
 import tempfile
 from pathlib import Path
 
@@ -62,7 +63,7 @@ class BackupTests(unittest.TestCase):
             latest_link = self.dest_dir_path / "latest"
             self.assertTrue(latest_link.exists())
             self.assertTrue(latest_link.is_symlink())
-            self.assertEqual(latest_link.readlink(), latest_backup_path)
+            self.assertEqual(Path(os.readlink(latest_link)), latest_backup_path)
             sleep(1)    # next time stamp (in seconds) must be unique
 
     def test_backup_saves_accidental_file_deletion_situation(self):
