@@ -110,17 +110,8 @@ def run_rsync(rsync_command: List[str]) -> int:
     logging.info(f"Running {rsync_command}")
 
     start_time = time.perf_counter()
-    # --------------------------------------------------------------------------
-    # stdout and stderr of subprocess are not captured and therefore are still
-    # sent as streams to the same location as calling process.
-    #
-    # TODO: Running like so will put rsync stderr into the log file which may
-    # or may not be wanted:
-    #
-    #   `sudo python3 ./run_backups.py 2>$HOME/backups.log`
-    #
-    # Another solution would be to log to a file instead of stderr.
-    # --------------------------------------------------------------------------
+    # NOTE: stdout and stderr of subprocess are not captured and therefore are
+    # still sent as streams to the same location as calling process.
     process = subprocess.run(rsync_command)
     end_time = time.perf_counter()
 
