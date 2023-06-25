@@ -1,11 +1,11 @@
-from rsync.config import Config
+from rsync.config import LocalConfig
 from rsync.backup import backup
 
 
 LOG_FILE = "/home/ethan/.local/share/backup/rsync-backups.log"
 
 # will need to be root to run rsync for a different user
-HOME_DIRECTORIES = Config(
+HOME_DIRECTORIES = LocalConfig(
     source_dir="/home/",
     destination_dir="/media/backup_drive_linux/home_directory_backups/",
     exclude_file_patterns=[
@@ -17,7 +17,7 @@ HOME_DIRECTORIES = Config(
     log_file=LOG_FILE
 )
 
-LARGE_HARDDRIVE = Config(
+LARGE_HARDDRIVE = LocalConfig(
     source_dir="/mnt/hd2",
     destination_dir="/media/backup_drive_linux/hd2_backups/",
     log_file=LOG_FILE

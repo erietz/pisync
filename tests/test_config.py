@@ -1,6 +1,6 @@
 import unittest
 from pathlib import Path
-from rsync.config import Config, InvalidPath
+from rsync.config import LocalConfig, InvalidPath
 
 
 OPTIONLESS_RSYNC_ARGUMENTS = [
@@ -19,7 +19,7 @@ class ConfigTests(unittest.TestCase):
         tmp = "/tmp"
 
         # act
-        config = Config(home, tmp)
+        config = LocalConfig(home, tmp)
 
         # assert
         self.assertEqual(str(config.source_dir), home)
@@ -33,7 +33,7 @@ class ConfigTests(unittest.TestCase):
 
         # act + assert
         with self.assertRaises(InvalidPath):
-            _ = Config(source, dest)
+            _ = LocalConfig(source, dest)
 
     def test_init_destination_does_not_exist(self):
         # arrange
@@ -42,13 +42,13 @@ class ConfigTests(unittest.TestCase):
 
         # act + assert
         with self.assertRaises(InvalidPath):
-            _ = Config(source, dest)
+            _ = LocalConfig(source, dest)
 
     def test_get_rsync_command_no_previous_backup(self):
         # arrange
         home = str(Path("~/").expanduser())
         tmp = "/tmp"
-        config = Config(home, tmp)
+        config = LocalConfig(home, tmp)
 
         # act
         new_backup_dir = config.generate_new_backup_dir_path()
@@ -70,7 +70,7 @@ class ConfigTests(unittest.TestCase):
         # arrange
         home = str(Path("~/").expanduser())
         tmp = "/tmp"
-        config = Config(home, tmp)
+        config = LocalConfig(home, tmp)
 
         # act
         new_backup_dir = config.generate_new_backup_dir_path()
@@ -97,7 +97,7 @@ class ConfigTests(unittest.TestCase):
             "/exclude/path2",
             "/exclude/path3/**/*.bak"
         ]
-        config = Config(
+        config = LocalConfig(
             home,
             tmp,
             exclude_file_patterns

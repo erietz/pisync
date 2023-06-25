@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from pathlib import Path
 from datetime import datetime
 from typing import List
@@ -7,9 +8,14 @@ class InvalidPath(Exception):
     pass
 
 
-class Config:
-    """Configuration for rsync backups"""
+def _get_time_stamp() -> str:
+    now = datetime.now()
+    stamp = now.strftime("%Y-%m-%d-%H-%M-%S")
+    return str(stamp)
 
+
+class _BaseConfig(ABC):
+    @abstractmethod
     def __init__(
         self,
         source_dir: str,
@@ -17,8 +23,33 @@ class Config:
         exclude_file_patterns: List[str] = None,
         log_file: str = Path.home() / ".local/share/backup/rsync-backups.log"
     ):
-        self.source_dir = self._ensure_dir_exists(source_dir)
-        self.destination_dir = self._ensure_dir_exists(destination_dir)
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def ensure_dir_exists(path: str) -> Path:
+        pass
+
+    @abstractmethod
+    def generate_new_backup_dir_path(self) -> Path:
+        pass
+
+    @abstractmethod
+    def get_rsync_command(self) -> List[str]:
+        pass
+
+
+class LocalConfig(_BaseConfig):
+    """Configuration for rsync backups"""
+    def __init__(
+        self,
+        source_dir: str,
+        destination_dir: str,
+        exclude_file_patterns: List[str] = None,
+        log_file: str = Path.home() / ".local/share/backup/rsync-backups.log"
+    ):
+        self.source_dir = self.ensure_dir_exists(source_dir)
+        self.destination_dir = self.ensure_dir_exists(destination_dir)
         self.exclude_file_patterns = exclude_file_patterns
         self.log_file = log_file
         self.link_dir = self.destination_dir / "latest"
@@ -35,7 +66,7 @@ class Config:
         ]
 
     @staticmethod
-    def _ensure_dir_exists(path: str) -> Path:
+    def ensure_dir_exists(path: str) -> Path:
         path = Path(path)
         if not path.exists():
             raise InvalidPath(f"{path} does not exist")
@@ -43,14 +74,8 @@ class Config:
             raise InvalidPath(f"{path} is not a directory")
         return path
 
-    @staticmethod
-    def _get_time_stamp() -> str:
-        now = datetime.now()
-        stamp = now.strftime("%Y-%m-%d-%H-%M-%S")
-        return str(stamp)
-
     def generate_new_backup_dir_path(self) -> Path:
-        time_stamp = self._get_time_stamp()
+        time_stamp = _get_time_stamp()
         new_backup_dir = self.destination_dir / time_stamp
         if new_backup_dir.exists():
             raise InvalidPath(

@@ -16,10 +16,10 @@ import subprocess
 import sys
 import time
 
-from rsync.config import Config
+from rsync.config import LocalConfig
 
 
-def backup(config: Config) -> Path:
+def backup(config: LocalConfig) -> Path:
     """
     Returns the path to the latest backup directory
     """

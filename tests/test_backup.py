@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 
 from rsync.backup import backup, run_rsync, directory_is_empty
-from rsync.config import Config
+from rsync.config import LocalConfig
 
 
 class UtilityFunctionTests(unittest.TestCase):
@@ -35,7 +35,7 @@ class BackupTests(unittest.TestCase):
     def setUp(self):
         self.src_dir = tempfile.TemporaryDirectory()
         self.dest_dir = tempfile.TemporaryDirectory()
-        self.config = Config(self.src_dir.name, self.dest_dir.name)
+        self.config = LocalConfig(self.src_dir.name, self.dest_dir.name)
         self.src_dir_path = Path(self.src_dir.name)
         self.dest_dir_path = Path(self.dest_dir.name)
 
