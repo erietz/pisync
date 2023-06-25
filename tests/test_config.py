@@ -6,8 +6,8 @@ from rsync.config import Config, InvalidPath
 OPTIONLESS_RSYNC_ARGUMENTS = [
     "--delete",
     "--archive",
-    "--acls",
-    "--xattrs",
+    # "--acls",
+    # "--xattrs",
     "--verbose",
 ]
 

@@ -9,6 +9,7 @@ class InvalidPath(Exception):
 
 class Config:
     """Configuration for rsync backups"""
+
     def __init__(
         self,
         source_dir: str,
@@ -24,8 +25,12 @@ class Config:
         self._optionless_rsync_arguments = [
             "--delete",     # delete extraneous files from dest dirs
             "--archive",    # archive mode is -rlptgoD (no -A,-X,-U,-N,-H)
-            "--acls",       # preserve ACLs (implies --perms)
-            "--xattrs",     # preserve extended attributes
+
+            # NOTE: these options are linux specific and do not work on the
+            # macOS version of rsync.
+            # "--acls",       # preserve ACLs (implies --perms)
+            # "--xattrs",     # preserve extended attributes
+
             "--verbose",    # increase verbosity
         ]
 

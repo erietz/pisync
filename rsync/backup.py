@@ -30,16 +30,16 @@ def backup(config: Config) -> Path:
 
     prev_backup_exists = not directory_is_empty(config.destination_dir)
     if prev_backup_exists and not config.link_dir.is_symlink():
-        msg = (
-            f"{config.destination_dir} exists and is not empty indicating "
-            "that a previous backup exists. However, there is no symlink "
-            f"at {config.link_dir} pointing to the most recent backup. "
-            "This would result a complete backup backup of "
-            f"{config.source_dir} rather than an incremental backup. "
-            "This is probably not the intended behavior so we are aborting. "
-            f"Make sure that {config.destination_dir} is empty or manually "
-            f"create the necessary symlink at {config.link_dir}."
-            )
+        msg = f"""
+{config.destination_dir} exists and is not empty indicating
+that a previous backup exists. However, there is no symlink
+at {config.link_dir} pointing to the most recent backup.
+This would result a complete backup backup of
+{config.source_dir} rather than an incremental backup.
+This is probably not the intended behavior so we are aborting.
+Make sure that {config.destination_dir} is empty or manually
+create the necessary symlink at {config.link_dir}.
+"""
         logging.error(msg)
         raise Exception(
             msg
