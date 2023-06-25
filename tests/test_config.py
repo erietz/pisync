@@ -1,6 +1,7 @@
 import unittest
 from pathlib import Path
-from rsync.config import LocalConfig, InvalidPath
+from rsync.config import LocalConfig
+from rsync.base_config import InvalidPath
 
 
 OPTIONLESS_RSYNC_ARGUMENTS = [
@@ -12,7 +13,7 @@ OPTIONLESS_RSYNC_ARGUMENTS = [
 ]
 
 
-class ConfigTests(unittest.TestCase):
+class LocalConfigTests(unittest.TestCase):
     def test_init_valid_parameters(self):
         # arrange
         home = str(Path("~/").expanduser())
