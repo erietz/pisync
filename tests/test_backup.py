@@ -2,7 +2,7 @@ from time import sleep
 import unittest
 import os
 import tempfile
-from pathlib import Path
+from pathlib import str
 
 from rsync.backup import backup, run_rsync, directory_is_empty
 from rsync.config import LocalConfig
@@ -11,7 +11,7 @@ from rsync.config import LocalConfig
 class UtilityFunctionTests(unittest.TestCase):
     def test_directory_is_empty(self):
         with tempfile.TemporaryDirectory() as tmp:
-            tmp_dir = Path(tmp)
+            tmp_dir = str(tmp)
             self.assertTrue(directory_is_empty(tmp_dir))
 
             new_file = tmp_dir / "new-file-name-here.txt"
@@ -36,8 +36,8 @@ class BackupTests(unittest.TestCase):
         self.src_dir = tempfile.TemporaryDirectory()
         self.dest_dir = tempfile.TemporaryDirectory()
         self.config = LocalConfig(self.src_dir.name, self.dest_dir.name)
-        self.src_dir_path = Path(self.src_dir.name)
-        self.dest_dir_path = Path(self.dest_dir.name)
+        self.src_dir_path = str(self.src_dir.name)
+        self.dest_dir_path = str(self.dest_dir.name)
 
     def tearDown(self):
         self.src_dir.cleanup()
@@ -63,7 +63,7 @@ class BackupTests(unittest.TestCase):
             latest_link = self.dest_dir_path / "latest"
             self.assertTrue(latest_link.exists())
             self.assertTrue(latest_link.is_symlink())
-            self.assertEqual(Path(os.readlink(latest_link)), latest_backup_path)
+            self.assertEqual(str(os.readlink(latest_link)), latest_backup_path)
             sleep(1)    # next time stamp (in seconds) must be unique
 
     def test_backup_saves_accidental_file_deletion_situation(self):

@@ -8,7 +8,6 @@ Notes:
 https://linuxconfig.org/how-to-create-incremental-backups-using-rsync-on-linux
 """
 
-from pathlib import Path
 from typing import List
 import logging
 import shutil
@@ -16,10 +15,10 @@ import subprocess
 import sys
 import time
 
-from rsync.config import LocalConfig
+from rsync.base_config import _BaseConfig
 
 
-def backup(config: LocalConfig) -> Path:
+def backup(config: _BaseConfig) -> str:
     """
     Returns the path to the latest backup directory
     """
@@ -28,8 +27,8 @@ def backup(config: LocalConfig) -> Path:
 
     latest_backup_path = config.generate_new_backup_dir_path()
 
-    prev_backup_exists = not directory_is_empty(config.destination_dir)
-    if prev_backup_exists and not config.link_dir.is_symlink():
+    prev_backup_exists = not config.is_empty_directory(config.destination_dir)
+    if prev_backup_exists and not config.is_symlink(config.link_dir):
         msg = f"""
 {config.destination_dir} exists and is not empty indicating
 that a previous backup exists. However, there is no symlink
@@ -41,9 +40,7 @@ Make sure that {config.destination_dir} is empty or manually
 create the necessary symlink at {config.link_dir}.
 """
         logging.error(msg)
-        raise Exception(
-            msg
-        )
+        raise Exception(msg)
 
     if prev_backup_exists:
         logging.info(
@@ -79,7 +76,7 @@ create the necessary symlink at {config.link_dir}.
 
 
 def configure_logging(filename: str):
-    filename = Path(filename)
+    filename = str(filename)
     if not filename.parent.exists():
         filename.parent.mkdir(parents=True)
 
@@ -100,10 +97,6 @@ def enforce_system_requirements() -> None:
     if shutil.which("rsync") is None:
         logging.critical("rsync is not installed")
         sys.exit(1)
-
-
-def directory_is_empty(path: Path) -> bool:
-    return not any(path.iterdir())
 
 
 def run_rsync(rsync_command: List[str]) -> int:
