@@ -18,7 +18,7 @@ class LocalConfig(_BaseConfig):
         self.destination_dir = destination_dir
         self.exclude_file_patterns = exclude_file_patterns
         self.log_file = log_file
-        self.link_dir = str(Path(self.destination_dir / "latest"))
+        self.link_dir = str(Path(self.destination_dir) / "latest")
         self._optionless_rsync_arguments = [
             "--delete",     # delete extraneous files from dest dirs
             "--archive",    # archive mode is -rlptgoD (no -A,-X,-U,-N,-H)
@@ -28,6 +28,23 @@ class LocalConfig(_BaseConfig):
     @staticmethod
     def is_symlink(path: str) -> bool:
         return Path(path).is_symlink()
+
+    @staticmethod
+    def file_exists(path: str) -> bool:
+        return Path(path).exists()
+
+    @staticmethod
+    def unlink(path: str) -> None:
+        return Path(path).unlink()
+
+    @staticmethod
+    def symlink_to(path: str, target: str) -> None:
+        return Path(path).symlink_to(target)
+
+    @staticmethod
+    def resolve(path: str) -> str:
+        """Make the path absolute, resolving any symlinks."""
+        return Path(path).resolve()
 
     @staticmethod
     def is_empty_directory(path: str) -> bool:
@@ -59,7 +76,7 @@ class RemoteConfig(_BaseConfig):
         source_dir: str,
         destination_dir: str,
         exclude_file_patterns: List[str] = None,
-        log_file: str = str.home() / ".local/share/backup/rsync-backups.log",
+        log_file: str = Path.home() / ".local/share/backup/rsync-backups.log",
     ):
         self.source_dir = self.ensure_dir_exists(source_dir)
         self.destination_dir = self.ensure_dir_exists(destination_dir)

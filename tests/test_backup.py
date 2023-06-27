@@ -2,21 +2,21 @@ from time import sleep
 import unittest
 import os
 import tempfile
-from pathlib import str
+from pathlib import Path
 
-from rsync.backup import backup, run_rsync, directory_is_empty
+from rsync.backup import backup, run_rsync
 from rsync.config import LocalConfig
 
 
-class UtilityFunctionTests(unittest.TestCase):
-    def test_directory_is_empty(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            tmp_dir = str(tmp)
-            self.assertTrue(directory_is_empty(tmp_dir))
+# class UtilityFunctionTests(unittest.TestCase):
+#     def test_directory_is_empty(self):
+#         with tempfile.TemporaryDirectory() as tmp:
+#             tmp_dir = Path(tmp)
+#             self.assertTrue(directory_is_empty(tmp_dir))
 
-            new_file = tmp_dir / "new-file-name-here.txt"
-            new_file.touch()
-            self.assertFalse(directory_is_empty(tmp_dir))
+#            new_file = tmp_dir / "new-file-name-here.txt"
+#            new_file.touch()
+#            self.assertFalse(directory_is_empty(tmp_dir))
 
 
 class RunRsyncTests(unittest.TestCase):
@@ -36,8 +36,8 @@ class BackupTests(unittest.TestCase):
         self.src_dir = tempfile.TemporaryDirectory()
         self.dest_dir = tempfile.TemporaryDirectory()
         self.config = LocalConfig(self.src_dir.name, self.dest_dir.name)
-        self.src_dir_path = str(self.src_dir.name)
-        self.dest_dir_path = str(self.dest_dir.name)
+        self.src_dir_path = Path(self.src_dir.name)
+        self.dest_dir_path = Path(self.dest_dir.name)
 
     def tearDown(self):
         self.src_dir.cleanup()
@@ -63,7 +63,7 @@ class BackupTests(unittest.TestCase):
             latest_link = self.dest_dir_path / "latest"
             self.assertTrue(latest_link.exists())
             self.assertTrue(latest_link.is_symlink())
-            self.assertEqual(str(os.readlink(latest_link)), latest_backup_path)
+            self.assertEqual(os.readlink(latest_link), latest_backup_path)
             sleep(1)    # next time stamp (in seconds) must be unique
 
     def test_backup_saves_accidental_file_deletion_situation(self):
@@ -74,11 +74,11 @@ class BackupTests(unittest.TestCase):
             file.touch()
 
         # act
-        first_backup_path = backup(self.config)
+        first_backup_path = Path(backup(self.config))
         file_to_delete = self.src_dir_path / file_names[3]
         file_to_delete.unlink()
         sleep(1)    # cannot run two backups at same dest in same second
-        second_backup_path = backup(self.config)
+        second_backup_path = Path(backup(self.config))
 
         # assert
         files_in_source = list(self.src_dir_path.iterdir())

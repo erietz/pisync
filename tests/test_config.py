@@ -1,5 +1,5 @@
 import unittest
-from pathlib import str
+from pathlib import Path
 from rsync.config import LocalConfig
 from rsync.base_config import InvalidPath
 
@@ -16,7 +16,7 @@ OPTIONLESS_RSYNC_ARGUMENTS = [
 class LocalConfigTests(unittest.TestCase):
     def test_init_valid_parameters(self):
         # arrange
-        home = str(str("~/").expanduser())
+        home = str(Path("~/").expanduser())
         tmp = "/tmp"
 
         # act
@@ -38,7 +38,7 @@ class LocalConfigTests(unittest.TestCase):
 
     def test_init_destination_does_not_exist(self):
         # arrange
-        source = str(str("~/").expanduser())
+        source = str(Path("~/").expanduser())
         dest = "/bad/directory/path/here/does/not/exist"
 
         # act + assert
@@ -47,7 +47,7 @@ class LocalConfigTests(unittest.TestCase):
 
     def test_get_rsync_command_no_previous_backup(self):
         # arrange
-        home = str(str("~/").expanduser())
+        home = str(Path("~/").expanduser())
         tmp = "/tmp"
         config = LocalConfig(home, tmp)
 
@@ -69,7 +69,7 @@ class LocalConfigTests(unittest.TestCase):
 
     def test_get_rsync_command_no_exclude_patterns(self):
         # arrange
-        home = str(str("~/").expanduser())
+        home = str(Path("~/").expanduser())
         tmp = "/tmp"
         config = LocalConfig(home, tmp)
 
@@ -91,7 +91,7 @@ class LocalConfigTests(unittest.TestCase):
 
     def test_get_rsync_command_with_exclude_patters(self):
         # arrange
-        home = str(str("~/").expanduser())
+        home = str(Path("~/").expanduser())
         tmp = "/tmp"
         exclude_file_patterns = [
             "/exclude/path1",

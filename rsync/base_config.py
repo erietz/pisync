@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import List
-from pathlib import str
 
 
 class InvalidPath(Exception):
@@ -8,30 +7,46 @@ class InvalidPath(Exception):
 
 
 class _BaseConfig(ABC):
-    @property
-    @abstractmethod
-    def source_dir(self) -> str:
-        pass
-
-    @property
-    @abstractmethod
-    def destination_dir(self) -> str:
-        pass
-
-    @property
-    @abstractmethod
-    def exclude_file_patterns(self) -> List[str]:
-        pass
-
-    @property
-    @abstractmethod
-    def log_file(self) -> str:
-        pass
+    source_dir: str
+    destination_dir: str
+    exclude_file_patterns: List[str]
+    log_file: str
+    link_dir: str
 
     @staticmethod
     @abstractmethod
     def is_symlink(path: str) -> bool:
         """returns true if path is a symbolic link"""
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def is_empty_directory(path: str) -> bool:
+        """returns true if path is a directory and contains no files"""
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def file_exists(path: str) -> bool:
+        """returns true if the file or directory exists"""
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def unlink(path: str) -> None:
+        """Remove this file or symbolic link."""
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def symlink_to(path: str, target: str) -> None:
+        """Make this path a symbolic link to target."""
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def resolve(path: str) -> str:
+        """Make the path absolute, resolving any symlinks."""
         pass
 
     @staticmethod
@@ -44,16 +59,10 @@ class _BaseConfig(ABC):
         """
         pass
 
-    @staticmethod
-    @abstractmethod
-    def is_empty_directory(path: str) -> bool:
-        """returns true if path is a directory and contains no files"""
-        pass
-
     @abstractmethod
     def generate_new_backup_dir_path(self) -> str:
         """
-        :returns: The Path object of the directory where the new backup will be
+        :returns: The Path string of the directory where the new backup will be
         written.
         :raises:
             InvalidPath: If the destination directory already exists

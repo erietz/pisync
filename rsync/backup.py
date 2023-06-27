@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 from rsync.base_config import _BaseConfig
 
@@ -44,7 +45,7 @@ create the necessary symlink at {config.link_dir}.
 
     if prev_backup_exists:
         logging.info(
-            f"Starting incremental backup from {config.link_dir.resolve()}")
+            f"Starting incremental backup from {config.resolve(config.link_dir)}")
     else:
         logging.info(f"No previous backup found at {config.destination_dir}")
         logging.info(
@@ -60,23 +61,23 @@ create the necessary symlink at {config.link_dir}.
 
     if exit_code == 0:
         logging.info("Finished backup successfully")
-        if config.link_dir.exists():
-            config.link_dir.unlink()
-        config.link_dir.symlink_to(latest_backup_path)
+        if config.file_exists(config.link_dir):
+            config.unlink(config.link_dir)
+        config.symlink_to(config.link_dir, latest_backup_path)
         logging.info(
             f"Symlink created from {config.link_dir} to {latest_backup_path}")
         return latest_backup_path
     else:
         # backup failed, we should delete the most recent backup
         logging.error(f"Backup failed. Rsync exit code: {exit_code}")
-        if latest_backup_path.exists():
+        if config.file_exists(latest_backup_path):
             logging.info(f"Deleting failed backup at {latest_backup_path}")
             shutil.rmtree(latest_backup_path)
         return None
 
 
 def configure_logging(filename: str):
-    filename = str(filename)
+    filename = Path(filename)
     if not filename.parent.exists():
         filename.parent.mkdir(parents=True)
 
