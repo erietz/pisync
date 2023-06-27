@@ -2,6 +2,7 @@ from typing import List
 from pathlib import Path
 from rsync.base_config import _BaseConfig, InvalidPath
 from rsync.util import get_time_stamp
+from fabric import Connection
 
 
 class LocalConfig(_BaseConfig):
@@ -78,8 +79,9 @@ class RemoteConfig(_BaseConfig):
         exclude_file_patterns: List[str] = None,
         log_file: str = Path.home() / ".local/share/backup/rsync-backups.log",
     ):
-        self.source_dir = self.ensure_dir_exists(source_dir)
-        self.destination_dir = self.ensure_dir_exists(destination_dir)
+        self.connection: Connection = Connection(user_at_hostname)
+        self.source_dir = source_dir
+        self.destination_dir = destination_dir
         self.exclude_file_patterns = exclude_file_patterns
         self.log_file = log_file
         self.link_dir = self.destination_dir / "latest"
@@ -95,9 +97,10 @@ class RemoteConfig(_BaseConfig):
             "--verbose",    # increase verbosity
         ]
 
-    @staticmethod
-    def ensure_dir_exists(path: str) -> str:
-        pass
+    def ensure_dir_exists(self, path: str) -> str:
+        result = self.connection.run(f"test -d {path}")
+        if not result.ok:
+            raise InvalidPath(f"{path} is not a directory")
 
     def generate_new_backup_dir_path(self) -> str:
         pass
