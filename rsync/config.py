@@ -102,8 +102,41 @@ class RemoteConfig(_BaseConfig):
         if not result.ok:
             raise InvalidPath(f"{path} is not a directory")
 
-    def generate_new_backup_dir_path(self) -> str:
+    def is_symlink(self, path: str) -> bool:
+        """returns true if path is a symbolic link"""
+        result = self.connection.run(f"test -L {path}")
+        return result.ok
+
+    @staticmethod
+    def is_empty_directory(path: str) -> bool:
+        """returns true if path is a directory and contains no files"""
         pass
 
-    def get_rsync_command(self) -> List[str]:
+    @staticmethod
+    def file_exists(path: str) -> bool:
+        """returns true if the file or directory exists"""
+        pass
+
+    @staticmethod
+    def unlink(path: str) -> None:
+        """Remove this file or symbolic link."""
+        pass
+
+    @staticmethod
+    def symlink_to(path: str, target: str) -> None:
+        """Make this path a symbolic link to target."""
+        pass
+
+    @staticmethod
+    def resolve(path: str) -> str:
+        """Make the path absolute, resolving any symlinks."""
+        pass
+
+    def generate_new_backup_dir_path(self) -> str:
+        """
+        :returns: The Path string of the directory where the new backup will be
+        written.
+        :raises:
+            InvalidPath: If the destination directory already exists
+        """
         pass

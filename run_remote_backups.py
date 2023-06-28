@@ -13,3 +13,5 @@ config = RemoteConfig(
     ],
     log_file="/tmp/rsync-remote-backups.log"
 )
+
+backup(config)
