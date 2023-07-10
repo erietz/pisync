@@ -14,12 +14,13 @@ class RemoteConfig(_BaseConfig):
         exclude_file_patterns: List[str] = None,
         log_file: str = Path.home() / ".local/share/backup/rsync-backups.log",
     ):
+        self.user_at_hostname = user_at_hostname
         self.connection: Connection = Connection(user_at_hostname)
         self.source_dir = source_dir
         self.destination_dir = destination_dir
         self.exclude_file_patterns = exclude_file_patterns
         self.log_file = log_file
-        self.link_dir = self.destination_dir / "latest"
+        self.link_dir = f"{self.destination_dir}/latest"
         self._optionless_rsync_arguments = [
             "--delete",     # delete extraneous files from dest dirs
             "--archive",    # archive mode is -rlptgoD (no -A,-X,-U,-N,-H)
@@ -32,40 +33,45 @@ class RemoteConfig(_BaseConfig):
             "--verbose",    # increase verbosity
         ]
 
+    def is_symlink(self, path: str) -> bool:
+        """returns true if path is a symbolic link"""
+        result = self.connection.run(f"test -L {path}", warn=True)
+        return result.ok
+
+    def is_empty_directory(self, path: str) -> bool:
+        """returns true if path is a directory and contains no files"""
+        result = self.connection.run(f"find {path} -type d -empty", warn=True)
+        return result.ok
+
+    def file_exists(self, path: str) -> bool:
+        """returns true if the file or directory exists"""
+        result = self.connection.run(f"test -f {path}", warn=True)
+        return result.ok
+
+    def unlink(self, path: str) -> None:
+        """Remove this file or symbolic link."""
+        result = self.connection.run(f"rm {path}", warn=True)
+        if not result.ok:
+            raise FileNotFoundError(f"Failed to remove {path}")
+
+    def symlink_to(self, path: str, target: str) -> None:
+        """Make this path a symbolic link to target."""
+        result = self.connection.run(f"ln -s {path} {target}", warn=True)
+        return result.ok
+
+    def resolve(self, path: str) -> str:
+        """Make the path absolute, resolving any symlinks."""
+        result = self.connection.run(f"realpath {path}", warn=True)
+        return result.stdout
+
     def ensure_dir_exists(self, path: str) -> str:
-        result = self.connection.run(f"test -d {path}")
+        result = self.connection.run(f"test -d {path}", warn=True)
         if not result.ok:
             raise InvalidPath(f"{path} is not a directory")
 
-    def is_symlink(self, path: str) -> bool:
-        """returns true if path is a symbolic link"""
-        result = self.connection.run(f"test -L {path}")
+    def _is_directory(self, path) -> bool:
+        result = self.connection.run(f"test -d {path}", warn=True)
         return result.ok
-
-    @staticmethod
-    def is_empty_directory(path: str) -> bool:
-        """returns true if path is a directory and contains no files"""
-        pass
-
-    @staticmethod
-    def file_exists(path: str) -> bool:
-        """returns true if the file or directory exists"""
-        pass
-
-    @staticmethod
-    def unlink(path: str) -> None:
-        """Remove this file or symbolic link."""
-        pass
-
-    @staticmethod
-    def symlink_to(path: str, target: str) -> None:
-        """Make this path a symbolic link to target."""
-        pass
-
-    @staticmethod
-    def resolve(path: str) -> str:
-        """Make the path absolute, resolving any symlinks."""
-        pass
 
     def generate_new_backup_dir_path(self) -> str:
         """
@@ -74,4 +80,37 @@ class RemoteConfig(_BaseConfig):
         :raises:
             InvalidPath: If the destination directory already exists
         """
-        pass
+        time_stamp = get_time_stamp()
+        new_backup_dir = f"{self.destination_dir}/{time_stamp}"
+        exists = self._is_directory(new_backup_dir) or self.file_exists(new_backup_dir)
+        if exists:
+            raise InvalidPath(
+                f"{new_backup_dir} already exists and will get overwritten"
+            )
+        else:
+            return str(new_backup_dir)
+
+    def get_rsync_command(
+            self,
+            new_backup_dir: str,
+            previous_backup_exists: bool = False
+    ) -> List[str]:
+        destination = f"{self.user_at_hostname}:{new_backup_dir}"
+        source = self.source_dir
+        link_dest = self.link_dir
+        option_arguments = []
+
+        if previous_backup_exists:
+            option_arguments.append(f"--link-dest={link_dest}")
+
+        if self.exclude_file_patterns is not None:
+            for pattern in self.exclude_file_patterns:
+                option_arguments.append(f"--exclude={pattern}")
+
+        return [
+            "rsync",
+            *self._optionless_rsync_arguments,
+            *option_arguments,
+            source,
+            destination
+        ]

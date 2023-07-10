@@ -2,9 +2,9 @@ from rsync.config import RemoteConfig
 from rsync.backup import backup
 
 config = RemoteConfig(
+    "ethan@sulfur.local",
     "/Users/ethan/Documents",
     "/tmp/remote_directory",
-    "ethan@sulfur.local",
     exclude_file_patterns=[
         "/home/*/.cache/",          # no need for cached files
         "/home/*/.local/",          # nvim plugins and python packages are huge

@@ -25,33 +25,26 @@ class LocalConfig(_BaseConfig):
             "--verbose",    # increase verbosity
         ]
 
-    @staticmethod
-    def is_symlink(path: str) -> bool:
+    def is_symlink(self, path: str) -> bool:
         return Path(path).is_symlink()
 
-    @staticmethod
-    def file_exists(path: str) -> bool:
+    def file_exists(self, path: str) -> bool:
         return Path(path).exists()
 
-    @staticmethod
-    def unlink(path: str) -> None:
+    def unlink(self, path: str) -> None:
         return Path(path).unlink()
 
-    @staticmethod
-    def symlink_to(path: str, target: str) -> None:
+    def symlink_to(self, path: str, target: str) -> None:
         return Path(path).symlink_to(target)
 
-    @staticmethod
-    def resolve(path: str) -> str:
+    def resolve(self, path: str) -> str:
         """Make the path absolute, resolving any symlinks."""
         return Path(path).resolve()
 
-    @staticmethod
-    def is_empty_directory(path: str) -> bool:
+    def is_empty_directory(self, path: str) -> bool:
         return not any(Path(path).iterdir())
 
-    @staticmethod
-    def ensure_dir_exists(path: str):
+    def ensure_dir_exists(self, path: str):
         path = Path(path)
         if not path.exists():
             raise InvalidPath(f"{path} does not exist")
@@ -68,3 +61,27 @@ class LocalConfig(_BaseConfig):
         else:
             return str(new_backup_dir)
 
+    def get_rsync_command(
+            self,
+            new_backup_dir: str,
+            previous_backup_exists: bool = False
+    ) -> List[str]:
+        destination = new_backup_dir
+        source = self.source_dir
+        link_dest = self.link_dir
+        option_arguments = []
+
+        if previous_backup_exists:
+            option_arguments.append(f"--link-dest={link_dest}")
+
+        if self.exclude_file_patterns is not None:
+            for pattern in self.exclude_file_patterns:
+                option_arguments.append(f"--exclude={pattern}")
+
+        return [
+            "rsync",
+            *self._optionless_rsync_arguments,
+            *option_arguments,
+            source,
+            destination
+        ]
