@@ -16,7 +16,7 @@ import sys
 import time
 from pathlib import Path
 
-from rsync.base_config import _BaseConfig
+from rsync.config.base_config import _BaseConfig
 
 
 def backup(config: _BaseConfig) -> str:
