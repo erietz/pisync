@@ -16,6 +16,8 @@ class RemoteConfig(_BaseConfig):
     ):
         self.user_at_hostname = user_at_hostname
         self.connection: Connection = Connection(user_at_hostname)
+        self.ensure_dir_exists(source_dir)
+        self.ensure_dir_exists(destination_dir)
         self.source_dir = source_dir
         self.destination_dir = destination_dir
         self.exclude_file_patterns = exclude_file_patterns
@@ -40,13 +42,15 @@ class RemoteConfig(_BaseConfig):
 
     def is_empty_directory(self, path: str) -> bool:
         """returns true if path is a directory and contains no files"""
-        result = self.connection.run(f"find {path} -type d -empty", warn=True)
+        result = self.connection.run(f'test -n "$(find {path} -maxdepth 0 -empty)"', warn=True)
         return result.ok
 
     def file_exists(self, path: str) -> bool:
         """returns true if the file or directory exists"""
-        result = self.connection.run(f"test -f {path}", warn=True)
-        return result.ok
+        return (
+            self.connection.run(f"test -d {path}", warn=True).ok
+            or self.connection.run(f"test -f {path}", warn=True).ok
+        )
 
     def unlink(self, path: str) -> None:
         """Remove this file or symbolic link."""
@@ -54,9 +58,9 @@ class RemoteConfig(_BaseConfig):
         if not result.ok:
             raise FileNotFoundError(f"Failed to remove {path}")
 
-    def symlink_to(self, path: str, target: str) -> None:
-        """Make this path a symbolic link to target."""
-        result = self.connection.run(f"ln -s {path} {target}", warn=True)
+    def symlink_to(self, symlink: str, file: str) -> None:
+        """Make symlink a symbolic link to file."""
+        result = self.connection.run(f"ln -s {file} {symlink}", warn=True)
         return result.ok
 
     def resolve(self, path: str) -> str:

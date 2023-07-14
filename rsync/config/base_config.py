@@ -34,8 +34,8 @@ class _BaseConfig(ABC):
         pass
 
     @abstractmethod
-    def symlink_to(self, path: str, target: str) -> None:
-        """Make this path a symbolic link to target."""
+    def symlink_to(self, symlink: str, file: str) -> None:
+        """Make symlink a symbolic link to file."""
         pass
 
     @abstractmethod

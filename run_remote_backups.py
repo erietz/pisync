@@ -2,7 +2,7 @@ from rsync.config import RemoteConfig
 from rsync.backup import backup
 
 config = RemoteConfig(
-    "ethan@sulfur.local",
+    "ethan@iron.local",
     "/Users/ethan/Documents",
     "/tmp/remote_directory",
     exclude_file_patterns=[

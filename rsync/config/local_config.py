@@ -34,8 +34,8 @@ class LocalConfig(_BaseConfig):
     def unlink(self, path: str) -> None:
         return Path(path).unlink()
 
-    def symlink_to(self, path: str, target: str) -> None:
-        return Path(path).symlink_to(target)
+    def symlink_to(self, symlink: str, file: str) -> None:
+        return Path(symlink).symlink_to(file)
 
     def resolve(self, path: str) -> str:
         """Make the path absolute, resolving any symlinks."""

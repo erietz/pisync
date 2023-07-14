@@ -65,7 +65,7 @@ create the necessary symlink at {config.link_dir}.
             config.unlink(config.link_dir)
         config.symlink_to(config.link_dir, latest_backup_path)
         logging.info(
-            f"Symlink created from {config.link_dir} to {latest_backup_path}")
+            f"Symlink created from {latest_backup_path} to {config.link_dir}")
         return latest_backup_path
     else:
         # backup failed, we should delete the most recent backup
