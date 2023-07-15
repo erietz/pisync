@@ -1,4 +1,4 @@
-import os
+import getpass
 import pytest
 from pathlib import Path
 from rsync.config import RemoteConfig, InvalidPath
@@ -17,7 +17,7 @@ def tmp() -> str:
 
 @pytest.fixture
 def user_at_localhost() -> str:
-    return f"{os.getlogin()}@localhost"
+    return f"{getpass.getuser()}@localhost"
 
 
 @pytest.fixture
