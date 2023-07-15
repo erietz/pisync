@@ -48,6 +48,7 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Allow passwordless ssh into localhost for tests
       run: |
+        ssh-keygen
         ssh-copy-id $(whoami)@localhost
     - name: Test with pytest
       run: |
