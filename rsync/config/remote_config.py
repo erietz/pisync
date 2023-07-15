@@ -66,7 +66,7 @@ class RemoteConfig(_BaseConfig):
     def resolve(self, path: str) -> str:
         """Make the path absolute, resolving any symlinks."""
         result = self.connection.run(f"realpath {path}", warn=True)
-        return result.stdout
+        return result.stdout.strip()
 
     def ensure_dir_exists(self, path: str) -> str:
         result = self.connection.run(f"test -d {path}", warn=True)

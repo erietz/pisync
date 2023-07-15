@@ -32,14 +32,14 @@ class LocalConfig(_BaseConfig):
         return Path(path).exists()
 
     def unlink(self, path: str) -> None:
-        return Path(path).unlink()
+        Path(path).unlink()
 
     def symlink_to(self, symlink: str, file: str) -> None:
-        return Path(symlink).symlink_to(file)
+        Path(symlink).symlink_to(file)
 
     def resolve(self, path: str) -> str:
         """Make the path absolute, resolving any symlinks."""
-        return Path(path).resolve()
+        return str(Path(path).resolve())
 
     def is_empty_directory(self, path: str) -> bool:
         return not any(Path(path).iterdir())
