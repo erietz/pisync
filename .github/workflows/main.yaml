@@ -46,6 +46,9 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Allow passwordless ssh into localhost for tests
+      run: |
+        ssh-copy-id $(whoami)@localhost
     - name: Test with pytest
       run: |
         pytest -s -vv
