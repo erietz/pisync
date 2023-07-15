@@ -1,6 +1,7 @@
 import pytest
 from pathlib import Path
 from rsync.config import LocalConfig, InvalidPath
+from rsync.util import get_time_stamp
 from typing import Tuple
 
 
@@ -85,3 +86,102 @@ class TestGetRsyncCommand:
             home,
             new_backup_dir
         ]
+
+
+class TestPathOperations:
+    def test_is_symlink(self, scratch_file_system, home_tmp_config):
+        _, _, config = home_tmp_config
+        assert config.is_symlink(scratch_file_system / "file1") is False
+        assert config.is_symlink(scratch_file_system / "file3") is False
+        assert config.is_symlink(scratch_file_system / "file3_symlink") is True
+        assert config.is_symlink(scratch_file_system / "dir1") is False
+        assert config.is_symlink(scratch_file_system / "dir3") is False
+        assert config.is_symlink(scratch_file_system / "dir3_symlink") is True
+
+    def test_file_exists(self, scratch_file_system, home_tmp_config):
+        _, _, config = home_tmp_config
+        assert config.file_exists(scratch_file_system / "file1") is True
+        assert config.file_exists(scratch_file_system / "file2") is True
+        assert config.file_exists(scratch_file_system / "file3") is True
+        assert config.file_exists(scratch_file_system / "file3_symlink") is True
+        assert config.file_exists(scratch_file_system / "dir1") is True
+        assert config.file_exists(scratch_file_system / "dir2") is True
+        assert config.file_exists(scratch_file_system / "dir3") is True
+        assert config.file_exists(scratch_file_system / "dir3_symlink") is True
+        assert config.file_exists(scratch_file_system / "dir1" / "file1") is True
+        assert config.file_exists(scratch_file_system / "dir1" / "file2") is True
+        assert config.file_exists(scratch_file_system / "foo") is False
+        assert config.file_exists(scratch_file_system / "bar") is False
+        assert config.file_exists(scratch_file_system / "dir1" / "foo") is False
+        assert config.file_exists(scratch_file_system / "dir2" / "foo") is False
+
+    def test_unlink(self, scratch_file_system, home_tmp_config):
+        _, _, config = home_tmp_config
+
+        assert (scratch_file_system / "file3_symlink").exists() is True
+        config.unlink(scratch_file_system / "file3_symlink")
+        assert (scratch_file_system / "file3_symlink").exists() is False
+
+        assert (scratch_file_system / "file1").exists() is True
+        config.unlink(scratch_file_system / "file1")
+        assert (scratch_file_system / "file1").exists() is False
+
+    def test_symlink_to(self, scratch_file_system, home_tmp_config):
+        _, _, config = home_tmp_config
+
+        assert (scratch_file_system / "file_symlink").exists() is False
+        config.symlink_to(scratch_file_system / "file_symlink", scratch_file_system / "file1")
+        assert (scratch_file_system / "file_symlink").exists() is True
+
+        assert (scratch_file_system / "dir_symlink").exists() is False
+        config.symlink_to(scratch_file_system / "dir_symlink", scratch_file_system / "dir1")
+        assert (scratch_file_system / "dir_symlink").exists() is True
+
+    def test_resolve(self, scratch_file_system, home_tmp_config):
+        _, _, config = home_tmp_config
+        fs = scratch_file_system
+        assert config.resolve(fs / "file3_symlink") == fs / "file3"
+        assert config.resolve(fs / "dir3_symlink") == fs / "dir3"
+
+    def test_is_empty_directory(self, scratch_file_system, home_tmp_config):
+        _, _, config = home_tmp_config
+        fs = scratch_file_system
+        assert (fs / "dir1").exists() is True
+        assert (fs / "dir2").exists() is True
+        assert config.is_empty_directory(fs / "dir1") is False
+        assert config.is_empty_directory(fs / "dir2") is True
+
+    def test_ensure_dir_exists(self, scratch_file_system, home_tmp_config):
+        _, _, config = home_tmp_config
+        fs = scratch_file_system
+
+        # no exception thrown
+        config.ensure_dir_exists(fs / "dir1")
+
+        # not a dir
+        assert (fs / "file1").exists()
+        with pytest.raises(InvalidPath):
+            config.ensure_dir_exists(fs / "file1")
+
+        # non existent
+        with pytest.raises(InvalidPath):
+            config.ensure_dir_exists(fs / "dir")
+
+    def test_generate_new_backup_dir_path(self, tmp_path, scratch_file_system):
+        config = LocalConfig(scratch_file_system, tmp_path)
+        # these two lines should be run within one second of each other
+        new_backup_dir = config.generate_new_backup_dir_path()
+        time_stamp = get_time_stamp()
+        assert new_backup_dir.split("/")[-1] == time_stamp
+
+    def test_generate_new_backup_dir_throws_exception_on_overwrite(
+        self,
+        tmp_path,
+        scratch_file_system,
+    ):
+        config = LocalConfig(scratch_file_system, tmp_path)
+        time_stamp = get_time_stamp()
+        (tmp_path / time_stamp).touch()
+
+        with pytest.raises(InvalidPath):
+            _ = config.generate_new_backup_dir_path()
