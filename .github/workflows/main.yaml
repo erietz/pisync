@@ -43,8 +43,13 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Allow passwordless ssh into localhost for tests
       run: |
+        mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
+        ssh-keyscan localhost >> ~/.ssh/known_hosts
+        eval $(ssh-agent)
+        ssh-add - <<< "${{ secrets.SSH_PRIVATE_KEY }}"
+
         ssh-keygen -t rsa -q -f "$HOME/.ssh/id_rsa" -N ""
-        ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+        # ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
         ssh-copy-id $(whoami)@localhost
     - name: Install dependencies
       run: |
