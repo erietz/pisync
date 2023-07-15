@@ -41,15 +41,16 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Allow passwordless ssh into localhost for tests
+      run: |
+        ssh-keygen -t rsa -q -f "$HOME/.ssh/id_rsa" -N ""
+        ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+        ssh-copy-id $(whoami)@localhost
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         python -m pip install pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Allow passwordless ssh into localhost for tests
-      run: |
-        ssh-keygen -t rsa -q -f "$HOME/.ssh/id_rsa" -N ""
-        ssh-copy-id $(whoami)@localhost
     - name: Test with pytest
       run: |
         pytest -s -vv
