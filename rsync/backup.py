@@ -104,11 +104,10 @@ def run_rsync(rsync_command: List[str]) -> int:
     logging.info(f"Running {rsync_command}")
 
     start_time = time.perf_counter()
-    # NOTE: stdout and stderr of subprocess are not captured and therefore are
-    # still sent as streams to the same location as calling process.
-    process = subprocess.run(rsync_command)
+    process = subprocess.run(rsync_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    for line in process.stdout.decode().split("\n"):
+        logging.info(f"RSYNC: {line}")
     end_time = time.perf_counter()
-
     logging.info(f"Time elapsed {end_time - start_time} seconds")
 
     return process.returncode
