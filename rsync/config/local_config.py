@@ -1,72 +1,74 @@
-from pathlib import Path
-from datetime import datetime
 from typing import List
+from pathlib import Path
+from rsync.config.base_config import _BaseConfig, InvalidPath
+from rsync.util import get_time_stamp
 
 
-class InvalidPath(Exception):
-    pass
-
-
-class Config:
-    """Configuration for rsync backups"""
-
+class LocalConfig(_BaseConfig):
     def __init__(
         self,
         source_dir: str,
         destination_dir: str,
         exclude_file_patterns: List[str] = None,
-        log_file: str = Path.home() / ".local/share/backup/rsync-backups.log"
+        log_file: str = str(Path.home() / ".local/share/backup/rsync-backups.log")
     ):
-        self.source_dir = self._ensure_dir_exists(source_dir)
-        self.destination_dir = self._ensure_dir_exists(destination_dir)
+        self.ensure_dir_exists(source_dir)
+        self.ensure_dir_exists(destination_dir)
+        self.source_dir = source_dir
+        self.destination_dir = destination_dir
         self.exclude_file_patterns = exclude_file_patterns
         self.log_file = log_file
-        self.link_dir = self.destination_dir / "latest"
+        self.link_dir = str(Path(self.destination_dir) / "latest")
         self._optionless_rsync_arguments = [
             "--delete",     # delete extraneous files from dest dirs
             "--archive",    # archive mode is -rlptgoD (no -A,-X,-U,-N,-H)
-
-            # NOTE: these options are linux specific and do not work on the
-            # macOS version of rsync.
-            # "--acls",       # preserve ACLs (implies --perms)
-            # "--xattrs",     # preserve extended attributes
-
             "--verbose",    # increase verbosity
         ]
 
-    @staticmethod
-    def _ensure_dir_exists(path: str) -> Path:
+    def is_symlink(self, path: str) -> bool:
+        return Path(path).is_symlink()
+
+    def file_exists(self, path: str) -> bool:
+        return Path(path).exists()
+
+    def unlink(self, path: str) -> None:
+        Path(path).unlink()
+
+    def symlink_to(self, symlink: str, file: str) -> None:
+        Path(symlink).symlink_to(file)
+
+    def resolve(self, path: str) -> str:
+        """Make the path absolute, resolving any symlinks."""
+        return str(Path(path).resolve())
+
+    def is_empty_directory(self, path: str) -> bool:
+        return not any(Path(path).iterdir())
+
+    def ensure_dir_exists(self, path: str):
         path = Path(path)
         if not path.exists():
             raise InvalidPath(f"{path} does not exist")
         if not path.is_dir():
             raise InvalidPath(f"{path} is not a directory")
-        return path
 
-    @staticmethod
-    def _get_time_stamp() -> str:
-        now = datetime.now()
-        stamp = now.strftime("%Y-%m-%d-%H-%M-%S")
-        return str(stamp)
-
-    def generate_new_backup_dir_path(self) -> Path:
-        time_stamp = self._get_time_stamp()
-        new_backup_dir = self.destination_dir / time_stamp
+    def generate_new_backup_dir_path(self) -> str:
+        time_stamp = get_time_stamp()
+        new_backup_dir = Path(self.destination_dir) / time_stamp
         if new_backup_dir.exists():
             raise InvalidPath(
                 f"{new_backup_dir} already exists and will get overwritten"
             )
         else:
-            return new_backup_dir
+            return str(new_backup_dir)
 
     def get_rsync_command(
             self,
-            new_backup_dir: Path,
+            new_backup_dir: str,
             previous_backup_exists: bool = False
     ) -> List[str]:
-        destination = str(new_backup_dir)
-        source = str(self.source_dir)
-        link_dest = str(self.link_dir)
+        destination = new_backup_dir
+        source = self.source_dir
+        link_dest = self.link_dir
         option_arguments = []
 
         if previous_backup_exists:

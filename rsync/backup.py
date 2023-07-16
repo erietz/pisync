@@ -8,18 +8,18 @@ Notes:
 https://linuxconfig.org/how-to-create-incremental-backups-using-rsync-on-linux
 """
 
-from pathlib import Path
 from typing import List
 import logging
 import shutil
 import subprocess
 import sys
 import time
+from pathlib import Path
 
-from rsync.config import Config
+from rsync.config.base_config import _BaseConfig
 
 
-def backup(config: Config) -> Path:
+def backup(config: _BaseConfig) -> str:
     """
     Returns the path to the latest backup directory
     """
@@ -28,8 +28,8 @@ def backup(config: Config) -> Path:
 
     latest_backup_path = config.generate_new_backup_dir_path()
 
-    prev_backup_exists = not directory_is_empty(config.destination_dir)
-    if prev_backup_exists and not config.link_dir.is_symlink():
+    prev_backup_exists = not config.is_empty_directory(config.destination_dir)
+    if prev_backup_exists and not config.is_symlink(config.link_dir):
         msg = f"""
 {config.destination_dir} exists and is not empty indicating
 that a previous backup exists. However, there is no symlink
@@ -41,13 +41,11 @@ Make sure that {config.destination_dir} is empty or manually
 create the necessary symlink at {config.link_dir}.
 """
         logging.error(msg)
-        raise Exception(
-            msg
-        )
+        raise Exception(msg)
 
     if prev_backup_exists:
         logging.info(
-            f"Starting incremental backup from {config.link_dir.resolve()}")
+            f"Starting incremental backup from {config.resolve(config.link_dir)}")
     else:
         logging.info(f"No previous backup found at {config.destination_dir}")
         logging.info(
@@ -63,16 +61,16 @@ create the necessary symlink at {config.link_dir}.
 
     if exit_code == 0:
         logging.info("Finished backup successfully")
-        if config.link_dir.exists():
-            config.link_dir.unlink()
-        config.link_dir.symlink_to(latest_backup_path)
+        if config.file_exists(config.link_dir):
+            config.unlink(config.link_dir)
+        config.symlink_to(config.link_dir, latest_backup_path)
         logging.info(
-            f"Symlink created from {config.link_dir} to {latest_backup_path}")
+            f"Symlink created from {latest_backup_path} to {config.link_dir}")
         return latest_backup_path
     else:
         # backup failed, we should delete the most recent backup
         logging.error(f"Backup failed. Rsync exit code: {exit_code}")
-        if latest_backup_path.exists():
+        if config.file_exists(latest_backup_path):
             logging.info(f"Deleting failed backup at {latest_backup_path}")
             shutil.rmtree(latest_backup_path)
         return None
@@ -102,19 +100,14 @@ def enforce_system_requirements() -> None:
         sys.exit(1)
 
 
-def directory_is_empty(path: Path) -> bool:
-    return not any(path.iterdir())
-
-
 def run_rsync(rsync_command: List[str]) -> int:
     logging.info(f"Running {rsync_command}")
 
     start_time = time.perf_counter()
-    # NOTE: stdout and stderr of subprocess are not captured and therefore are
-    # still sent as streams to the same location as calling process.
-    process = subprocess.run(rsync_command)
+    process = subprocess.run(rsync_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    for line in process.stdout.decode().split("\n"):
+        logging.info(f"RSYNC: {line}")
     end_time = time.perf_counter()
-
     logging.info(f"Time elapsed {end_time - start_time} seconds")
 
     return process.returncode
