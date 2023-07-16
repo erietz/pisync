@@ -27,15 +27,15 @@ local_large_harddrive = LocalConfig(
 remote_home_directories = RemoteConfig(
     user_at_hostname="ethan@hydrogen.local",
     source_dir="/home/",
-    destination_dir="/mnt/sulfur_backups/home_directory_backups",
+    destination_dir="/mnt/hd/sulfur_backups/home_directory_backups",
     exclude_file_patterns=home_dir_exclude_file_patterns,
     log_file=log_file
 )
 
 remote_large_harddrive = RemoteConfig(
     user_at_hostname="ethan@hydrogen.local",
-    source_dir="/mnt/hd2",
-    destination_dir="/mnt/sulfur_backups/hd2_backups",
+    source_dir="/mnt/hd2/",
+    destination_dir="/mnt/hd/sulfur_backups/hd2_backups",
     log_file=log_file
 )
 

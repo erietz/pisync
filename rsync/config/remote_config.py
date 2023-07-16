@@ -16,7 +16,7 @@ class RemoteConfig(_BaseConfig):
     ):
         self.user_at_hostname = user_at_hostname
         self.connection: Connection = Connection(user_at_hostname)
-        self.ensure_dir_exists(source_dir)
+        # self.ensure_dir_exists(source_dir)
         self.ensure_dir_exists(destination_dir)
         self.source_dir = source_dir
         self.destination_dir = destination_dir
