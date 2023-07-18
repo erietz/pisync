@@ -1,37 +1,51 @@
-# About
+`pisync` is a simple library to aid in writing an incremental backup script to
+a local or remote machine. The only dependencies are [rsync][rsync],
+[python][python] >= v3.6, [fabric][fabric], and ssh keys copied over to a unix
+machine. *Note:* no dependencies are required on the remote machine.
 
-- I wanted incremental backups and I wanted to be convinced that they were
-  working properly.
-- It is hard to write clean shell scripts so I chose to keep everything in
-  python.
+# Installation
+
+`pip install pisync`
 
 # Example Usage
 
 ```Python
-from rsync.config import Config
-from rsync.backup import backup
+from pisync import LocalConfig, RemoteConfig, backup
 
-documents = Config(
-    source_dir="/home/ethan/Documents",
-    destination_dir="/tmp/backup_test",
+local_docs = LocalConfig(
+    source_dir="/home/ethan/Documents", # local machine
+    destination_dir="/tmp/backup_test", # local machine
     exclude_file_patterns=[
         "**/node_modules",
         "junk/",
     ],
-    log_file="/tmp/backup-logs/backups.log"
+    log_file="/tmp/backup-logs/backups.log" # local machine
 )
 
-backup(documents)
+remote_docs = RemoteConfig(
+    user_at_hostname="ethan@hydrogen.local", # remote machine
+    source_dir="/home/ethan/Documents", # local machine
+    destination_dir="/tmp/backup_test", # remote machine
+    exclude_file_patterns=[
+        "**/node_modules",
+        "junk/",
+    ],
+    log_file="/tmp/backup-logs/backups.log" # local machine
+)
+
+backup(local_docs)
+backup(remote_docs)
 ```
 
-Also see `./run_backups.py` for how I have configured things.
+Also see [an example config](./examples/run_backups.py) for how I backup my
+home server both locally and to an offsite [raspberry pi][pi].
 
 # Notes
 
 ## Safety
 
-- Creating a `Config` object will fail if `source_dir` or `destination_dir` do
-  not exist or are not directories.
+- Creating a `LocalConfig` or `RemoteConfig` object will fail if `source_dir`
+  or `destination_dir` do not exist or are not directories.
 - If `destination_dir` is not empty, it is assumed that a previous backup
   exists.
   - The backup will not run if `destination_dir` is not empty and there is not
@@ -54,3 +68,22 @@ Also see `./run_backups.py` for how I have configured things.
 - You can also specify the log file location in your `Config`.
     - Hard coding the log file path solves some of the quirks that you can run
       into when using a cron job.
+
+
+## Running tests
+
+The unit/integration tests require password-less login to localhost as the
+"remote" machine.
+
+```
+ssh-copy-id $USER@localhost
+git clone https://github.com/erietz/pisync
+cd pisync
+pip install -r dev-requirements.txt
+make test
+```
+
+[rsync]: https://github.com/WayneD/rsync
+[python]: https://www.python.org/
+[fabric]: https://github.com/fabric/fabric
+[pi]: https://www.raspberrypi.com/
