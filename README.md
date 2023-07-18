@@ -1,7 +1,8 @@
-`pisync` is a simple library to aid in writing an incremental backup script to
-a local or remote machine. The only dependencies are [rsync][rsync],
+`pisync` is a simple library to aid in writing incremental backup scripts to
+local or remote machines. The only dependencies are [rsync][rsync],
 [python][python] >= v3.6, [fabric][fabric], and ssh keys copied over to a unix
-machine. *Note:* no dependencies are required on the remote machine.
+machine if doing a remote backup. *Note:* no dependencies are required on the
+remote machine.
 
 # Installation
 
@@ -65,7 +66,7 @@ home server both locally and to an offsite [raspberry pi][pi].
   user is probably `/root` rather than your `~/` directory.
 - If you want the log file to still go the your home directory when you run as
   root, use this `sudo -E python3 ./run_backups.py`
-- You can also specify the log file location in your `Config`.
+- You can also specify the log file location in your config.
     - Hard coding the log file path solves some of the quirks that you can run
       into when using a cron job.
 
