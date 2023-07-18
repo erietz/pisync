@@ -1,6 +1,6 @@
 from pisync import LocalConfig, RemoteConfig, backup
 
-# will need to be root to run rsync for a different user
+# will need to be root to run rsync for a different users home dir
 
 log_file = "/home/ethan/.local/share/backup/rsync-backups.log"
 home_dir_exclude_file_patterns = [
