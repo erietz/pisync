@@ -27,9 +27,9 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Documentation = "https://github.com/unknown/pisync#readme"
-Issues = "https://github.com/unknown/pisync/issues"
-Source = "https://github.com/unknown/pisync"
+Documentation = "https://github.com/erietz/pisync#readme"
+Issues = "https://github.com/erietz/pisync/issues"
+Source = "https://github.com/erietz/pisync"
 
 [tool.hatch.version]
 path = "src/pisync/__about__.py"
