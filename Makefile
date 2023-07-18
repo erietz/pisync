@@ -15,6 +15,7 @@ freeze:
 	pip list --format=freeze > requirements.txt
 
 
+.PHONY: dist
 dist:
 	python3 -m pip install --upgrade build
 	python3 -m build
