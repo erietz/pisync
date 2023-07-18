@@ -1,8 +1,8 @@
 import getpass
 import pytest
 from pathlib import Path
-from rsync.config import RemoteConfig, InvalidPath
-from rsync.util import get_time_stamp
+from pisync.config import RemoteConfig, InvalidPath
+from pisync.util import get_time_stamp
 from typing import Tuple
 
 

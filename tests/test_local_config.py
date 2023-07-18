@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
-from rsync.config import LocalConfig, InvalidPath
-from rsync.util import get_time_stamp
+from pisync.config import LocalConfig, InvalidPath
+from pisync.util import get_time_stamp
 from typing import Tuple
 
 

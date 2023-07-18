@@ -1,7 +1,7 @@
 from typing import List
 from pathlib import Path
-from rsync.config.base_config import _BaseConfig, InvalidPath
-from rsync.util import get_time_stamp
+from pisync.config.base_config import _BaseConfig, InvalidPath
+from pisync.util import get_time_stamp
 from fabric import Connection
 
 

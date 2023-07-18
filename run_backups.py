@@ -1,5 +1,5 @@
-from rsync.config import LocalConfig, RemoteConfig
-from rsync.backup import backup
+from pisync.config import LocalConfig, RemoteConfig
+from pisync.backup import backup
 
 # will need to be root to run rsync for a different user
 
