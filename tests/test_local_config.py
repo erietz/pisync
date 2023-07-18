@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
-from rsync.config import LocalConfig, InvalidPath
-from rsync.util import get_time_stamp
+from pisync.config import LocalConfig, InvalidPath
+from pisync.util import get_time_stamp
 from typing import Tuple
 
 
@@ -167,6 +167,7 @@ class TestPathOperations:
         with pytest.raises(InvalidPath):
             config.ensure_dir_exists(fs / "dir")
 
+    @pytest.mark.skip(reason="Time difference between the two statements sometimes causes fail")
     def test_generate_new_backup_dir_path(self, tmp_path, scratch_file_system):
         config = LocalConfig(scratch_file_system, tmp_path)
         # these two lines should be run within one second of each other

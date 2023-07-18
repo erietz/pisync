@@ -1,7 +1,7 @@
 from typing import List
 from pathlib import Path
-from rsync.config.base_config import _BaseConfig, InvalidPath
-from rsync.util import get_time_stamp
+from pisync.config.base_config import _BaseConfig, InvalidPath
+from pisync.util import get_time_stamp
 from fabric import Connection
 
 
@@ -16,7 +16,7 @@ class RemoteConfig(_BaseConfig):
     ):
         self.user_at_hostname = user_at_hostname
         self.connection: Connection = Connection(user_at_hostname)
-        # self.ensure_dir_exists(source_dir)
+        self._ensure_dir_exists_locally(source_dir)
         self.ensure_dir_exists(destination_dir)
         self.source_dir = source_dir
         self.destination_dir = destination_dir
@@ -34,6 +34,13 @@ class RemoteConfig(_BaseConfig):
 
             "--verbose",    # increase verbosity
         ]
+
+    def _ensure_dir_exists_locally(self, path: str):
+        path = Path(path)
+        if not path.exists():
+            raise InvalidPath(f"{path} does not exist")
+        if not path.is_dir():
+            raise InvalidPath(f"{path} is not a directory")
 
     def is_symlink(self, path: str) -> bool:
         """returns true if path is a symbolic link"""

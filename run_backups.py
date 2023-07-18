@@ -1,5 +1,4 @@
-from rsync.config import LocalConfig, RemoteConfig
-from rsync.backup import backup
+from pisync import LocalConfig, RemoteConfig, backup
 
 # will need to be root to run rsync for a different user
 
@@ -38,7 +37,6 @@ remote_large_harddrive = RemoteConfig(
     destination_dir="/mnt/hd/sulfur_backups/hd2_backups",
     log_file=log_file
 )
-
 
 success = True
 

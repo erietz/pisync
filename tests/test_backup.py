@@ -4,8 +4,8 @@ import os
 import tempfile
 from pathlib import Path
 
-from rsync.backup import backup, run_rsync
-from rsync.config import LocalConfig
+from pisync.backup import backup, run_rsync
+from pisync.config import LocalConfig
 
 
 # class UtilityFunctionTests(unittest.TestCase):
