@@ -54,7 +54,3 @@ Also see `./run_backups.py` for how I have configured things.
 - You can also specify the log file location in your `Config`.
     - Hard coding the log file path solves some of the quirks that you can run
       into when using a cron job.
-
-# TODO
-
-- Make this work over ssh.
