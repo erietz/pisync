@@ -13,3 +13,12 @@ test:
 .PHONY: freeze
 freeze:
 	pip list --format=freeze > requirements.txt
+
+
+dist:
+	python3 -m pip install --upgrade build
+	python3 -m build
+	python3 -m pip install --upgrade twine
+	echo "CHECK THIS VERSION NUMBER AND CHANGE IF NECESSARY!"
+	cat ./src/pisync/__about__.py
+	python3 -m twine upload dist/*
