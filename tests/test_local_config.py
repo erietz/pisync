@@ -167,6 +167,7 @@ class TestPathOperations:
         with pytest.raises(InvalidPath):
             config.ensure_dir_exists(fs / "dir")
 
+    @pytest.mark.skip(reason="Time difference between the two statements sometimes causes fail")
     def test_generate_new_backup_dir_path(self, tmp_path, scratch_file_system):
         config = LocalConfig(scratch_file_system, tmp_path)
         # these two lines should be run within one second of each other

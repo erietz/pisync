@@ -6,6 +6,10 @@ lint:
 	# The GitHub editor is 127 chars wide
 	flake8 . --count --max-complexity=10 --max-line-length=127 --statistics --per-file-ignores="__init__.py:F401"
 
+.PHONY: test
+test:
+	pytest -s -vv
+
 .PHONY: freeze
 freeze:
 	pip list --format=freeze > requirements.txt
