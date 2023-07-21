@@ -8,13 +8,13 @@ Notes:
 https://linuxconfig.org/how-to-create-incremental-backups-using-rsync-on-linux
 """
 
-from typing import List
 import logging
 import shutil
 import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import List
 
 from pisync.config.base_config import _BaseConfig
 
@@ -44,18 +44,12 @@ create the necessary symlink at {config.link_dir}.
         raise Exception(msg)
 
     if prev_backup_exists:
-        logging.info(
-            f"Starting incremental backup from {config.resolve(config.link_dir)}")
+        logging.info(f"Starting incremental backup from {config.resolve(config.link_dir)}")
     else:
         logging.info(f"No previous backup found at {config.destination_dir}")
-        logging.info(
-            f"Starting a fresh complete backup from {config.source_dir} "
-            "to {config.destination_dir}")
+        logging.info(f"Starting a fresh complete backup from {config.source_dir} " "to {config.destination_dir}")
 
-    rsync_command = config.get_rsync_command(
-        latest_backup_path,
-        previous_backup_exists=prev_backup_exists
-    )
+    rsync_command = config.get_rsync_command(latest_backup_path, previous_backup_exists=prev_backup_exists)
 
     exit_code = run_rsync(rsync_command)
 
@@ -64,8 +58,7 @@ create the necessary symlink at {config.link_dir}.
         if config.file_exists(config.link_dir):
             config.unlink(config.link_dir)
         config.symlink_to(config.link_dir, latest_backup_path)
-        logging.info(
-            f"Symlink created from {latest_backup_path} to {config.link_dir}")
+        logging.info(f"Symlink created from {latest_backup_path} to {config.link_dir}")
         return latest_backup_path
     else:
         # backup failed, we should delete the most recent backup
@@ -84,17 +77,13 @@ def configure_logging(filename: str):
     logging.basicConfig(
         filename=str(filename.resolve()),
         filemode="a",
-        format='%(levelname)s\t%(asctime)s\t%(message)s',
-        datefmt='%m/%d/%Y %I:%M:%S %p',
-        level=logging.INFO
+        format="%(levelname)s\t%(asctime)s\t%(message)s",
+        datefmt="%m/%d/%Y %I:%M:%S %p",
+        level=logging.INFO,
     )
 
 
 def enforce_system_requirements() -> None:
-    if sys.version_info < (3, 6):
-        logging.critical("Requires Python 3.6 due to f strings")
-        sys.exit(1)
-
     if shutil.which("rsync") is None:
         logging.critical("rsync is not installed")
         sys.exit(1)

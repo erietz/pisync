@@ -1,2 +1,2 @@
-from .backup import backup
-from .config import LocalConfig, RemoteConfig
+from pisync.backup import backup
+from pisync.config import LocalConfig, RemoteConfig

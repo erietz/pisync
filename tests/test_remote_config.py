@@ -1,9 +1,11 @@
 import getpass
-import pytest
 from pathlib import Path
-from pisync.config import RemoteConfig, InvalidPath
-from pisync.util import get_time_stamp
 from typing import Tuple
+
+import pytest
+
+from pisync.config import InvalidPath, RemoteConfig
+from pisync.util import get_time_stamp
 
 
 @pytest.fixture
@@ -56,12 +58,7 @@ class TestGetRsyncCommand:
 
         # For example: /tmp/2023-07-14-17-24-23
         assert new_backup_dir.startswith("/tmp/")
-        assert rsync_cmd == [
-            "rsync",
-            *optionless_arguments,
-            home,
-            f"{user_at_localhost}:{new_backup_dir}"
-        ]
+        assert rsync_cmd == ["rsync", *optionless_arguments, home, f"{user_at_localhost}:{new_backup_dir}"]
 
     def test_previous_backup_exists(self, home_tmp_config, optionless_arguments, user_at_localhost):
         home, tmp, config = home_tmp_config
@@ -75,15 +72,11 @@ class TestGetRsyncCommand:
             *optionless_arguments,
             f"--link-dest={tmp}/latest",
             home,
-            f"{user_at_localhost}:{new_backup_dir}"
+            f"{user_at_localhost}:{new_backup_dir}",
         ]
 
     def test_exclude_patterns(self, home, tmp, optionless_arguments, user_at_localhost):
-        exclude_file_patterns = [
-            "/exclude/path1",
-            "/exclude/path2",
-            "/exclude/path3/**/*.bak"
-        ]
+        exclude_file_patterns = ["/exclude/path1", "/exclude/path2", "/exclude/path3/**/*.bak"]
         config = RemoteConfig(user_at_localhost, home, tmp, exclude_file_patterns)
         new_backup_dir = config.generate_new_backup_dir_path()
         rsync_cmd = config.get_rsync_command(new_backup_dir, previous_backup_exists=False)
@@ -93,9 +86,9 @@ class TestGetRsyncCommand:
         assert rsync_cmd == [
             "rsync",
             *optionless_arguments,
-            *map(lambda p: f"--exclude={p}", exclude_file_patterns),
+            *(f"--exclude={p}" for p in exclude_file_patterns),
             home,
-            f"{user_at_localhost}:{new_backup_dir}"
+            f"{user_at_localhost}:{new_backup_dir}",
         ]
 
 
@@ -187,10 +180,7 @@ class TestPathOperations:
         assert new_backup_dir.split("/")[-1] == time_stamp
 
     def test_generate_new_backup_dir_throws_exception_on_overwrite(
-        self,
-        tmp_path,
-        scratch_file_system,
-        user_at_localhost
+        self, tmp_path, scratch_file_system, user_at_localhost
     ):
         config = RemoteConfig(user_at_localhost, scratch_file_system, tmp_path)
         time_stamp = get_time_stamp()

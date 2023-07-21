@@ -80,7 +80,7 @@ The unit/integration tests require password-less login to localhost as the
 ssh-copy-id $USER@localhost
 git clone https://github.com/erietz/pisync
 cd pisync
-pip install -r dev-requirements.txt
+pip install -e .
 make test
 ```
 
