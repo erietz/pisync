@@ -1,22 +1,14 @@
-.PHONY: lint
-# copied from the pipeline
-lint:
-	# stop the build if there are Python syntax errors or undefined names
-	flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --per-file-ignores="__init__.py:F401"
-	# The GitHub editor is 127 chars wide
-	flake8 . --count --max-complexity=10 --max-line-length=127 --statistics --per-file-ignores="__init__.py:F401"
-
 .PHONY: test
 test:
-	pytest -s -vv
+	# TODO: figure out why -s option is required for fabric remote connection
+	hatch run test -s -vv
 
-.PHONY: freeze
-freeze:
-	pip list --format=freeze > requirements.txt
-
+.PHONY: coverage
+	hatch run cov -s -vv
 
 .PHONY: dist
 dist:
+	# todo move all this to script in pyproject.toml
 	python3 -m pip install --upgrade build
 	python3 -m build
 	python3 -m pip install --upgrade twine

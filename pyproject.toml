@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = 'Minimal incremental backup script using rsync '
 readme = "README.md"
 requires-python = ">=3.7"
-license = "MIT"
+license = "GPL-3.0-or-later"
 keywords = []
 authors = [
   { name = "erietz", email = "ewrietz@gmail.com" },
