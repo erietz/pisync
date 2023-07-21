@@ -1,12 +1,11 @@
-from time import sleep
-import unittest
 import os
 import tempfile
+import unittest
 from pathlib import Path
+from time import sleep
 
 from pisync.backup import backup, run_rsync
 from pisync.config import LocalConfig
-
 
 # class UtilityFunctionTests(unittest.TestCase):
 #     def test_directory_is_empty(self):
@@ -26,7 +25,7 @@ class RunRsyncTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
 
     def test_fake_command_exit_non_zero(self):
-        rsync_command = ["ls", "-z"]    # there is no -z options for ls
+        rsync_command = ["ls", "-z"]  # there is no -z options for ls
         exit_code = run_rsync(rsync_command)
         self.assertNotEqual(exit_code, 0)
 
@@ -57,14 +56,14 @@ class BackupTests(unittest.TestCase):
             files_in_source = list(self.src_dir_path.iterdir())
             self.assertEqual(len(files_in_source), i)
             for source_file in files_in_source:
-                dest_file = self.dest_dir_path/latest_backup_path/source_file
+                dest_file = self.dest_dir_path / latest_backup_path / source_file
                 self.assertTrue(dest_file.exists())
 
             latest_link = self.dest_dir_path / "latest"
             self.assertTrue(latest_link.exists())
             self.assertTrue(latest_link.is_symlink())
             self.assertEqual(os.readlink(latest_link), latest_backup_path)
-            sleep(1)    # next time stamp (in seconds) must be unique
+            sleep(1)  # next time stamp (in seconds) must be unique
 
     def test_backup_saves_accidental_file_deletion_situation(self):
         # arrange
@@ -77,17 +76,13 @@ class BackupTests(unittest.TestCase):
         first_backup_path = Path(backup(self.config))
         file_to_delete = self.src_dir_path / file_names[3]
         file_to_delete.unlink()
-        sleep(1)    # cannot run two backups at same dest in same second
+        sleep(1)  # cannot run two backups at same dest in same second
         second_backup_path = Path(backup(self.config))
 
         # assert
         files_in_source = list(self.src_dir_path.iterdir())
-        files_in_first_backup = list(
-            (first_backup_path / self.src_dir_path.name).iterdir()
-        )
-        files_in_second_backup = list(
-            (second_backup_path / self.src_dir_path.name).iterdir()
-        )
+        files_in_first_backup = list((first_backup_path / self.src_dir_path.name).iterdir())
+        files_in_second_backup = list((second_backup_path / self.src_dir_path.name).iterdir())
 
         self.assertEqual(len(files_in_source), 4)
         self.assertEqual(len(files_in_first_backup), 5)
@@ -102,7 +97,4 @@ class BackupTests(unittest.TestCase):
         self.assertNotIn(self.src_dir_path / file_names[3], files_in_source)
 
         # file at index 3 (aka test3.txt) is not in latest backup
-        self.assertNotIn(
-            second_backup_path / self.src_dir_path.name / file_names[3],
-            files_in_second_backup
-        )
+        self.assertNotIn(second_backup_path / self.src_dir_path.name / file_names[3], files_in_second_backup)
