@@ -4,7 +4,7 @@ from typing import Tuple
 
 import pytest
 
-from pisync.config import InvalidPath, RemoteConfig
+from pisync.config import InvalidPathError, RemoteConfig
 from pisync.util import get_time_stamp
 
 
@@ -40,13 +40,13 @@ class TestInitConfig:
     def test_source_does_not_exist_throws_invalid_path(self, user_at_localhost):
         source = "/bad/directory/path/here/does/not/exist"
         dest = "/tmp"
-        with pytest.raises(InvalidPath):
+        with pytest.raises(InvalidPathError):
             _ = RemoteConfig(user_at_localhost, source, dest)
 
     def test_destination_does_not_exist_throws_invalid_path(self, user_at_localhost):
         source = str(Path("~/").expanduser())
         dest = "/bad/directory/path/here/does/not/exist"
-        with pytest.raises(InvalidPath):
+        with pytest.raises(InvalidPathError):
             _ = RemoteConfig(user_at_localhost, source, dest)
 
 
@@ -164,11 +164,11 @@ class TestPathOperations:
 
         # not a dir
         assert (fs / "file1").exists()
-        with pytest.raises(InvalidPath):
+        with pytest.raises(InvalidPathError):
             config.ensure_dir_exists(fs / "file1")
 
         # non existent
-        with pytest.raises(InvalidPath):
+        with pytest.raises(InvalidPathError):
             config.ensure_dir_exists(fs / "dir")
 
     @pytest.mark.skip(reason="Time difference between the two statements sometimes causes fail")
@@ -186,5 +186,5 @@ class TestPathOperations:
         time_stamp = get_time_stamp()
         (tmp_path / time_stamp).touch()
 
-        with pytest.raises(InvalidPath):
+        with pytest.raises(InvalidPathError):
             _ = config.generate_new_backup_dir_path()

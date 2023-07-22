@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Optional
 
-from pisync.config.base_config import InvalidPath, _BaseConfig
+from pisync.config.base_config import InvalidPathError, _BaseConfig
 from pisync.util import get_time_stamp
 
 
@@ -49,17 +49,17 @@ class LocalConfig(_BaseConfig):
         path = Path(path)
         if not path.exists():
             msg = f"{path} does not exist"
-            raise InvalidPath(msg)
+            raise InvalidPathError(msg)
         if not path.is_dir():
             msg = f"{path} is not a directory"
-            raise InvalidPath(msg)
+            raise InvalidPathError(msg)
 
     def generate_new_backup_dir_path(self) -> str:
         time_stamp = get_time_stamp()
         new_backup_dir = Path(self.destination_dir) / time_stamp
         if new_backup_dir.exists():
             msg = f"{new_backup_dir} already exists and will get overwritten"
-            raise InvalidPath(msg)
+            raise InvalidPathError(msg)
         else:
             return str(new_backup_dir)
 

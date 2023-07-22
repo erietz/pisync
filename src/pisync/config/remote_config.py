@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from fabric import Connection
 
-from pisync.config.base_config import InvalidPath, _BaseConfig
+from pisync.config.base_config import InvalidPathError, _BaseConfig
 from pisync.util import get_time_stamp
 
 
@@ -39,10 +39,10 @@ class RemoteConfig(_BaseConfig):
         path = Path(path)
         if not path.exists():
             msg = f"{path} does not exist"
-            raise InvalidPath(msg)
+            raise InvalidPathError(msg)
         if not path.is_dir():
             msg = f"{path} is not a directory"
-            raise InvalidPath(msg)
+            raise InvalidPathError(msg)
 
     def is_symlink(self, path: str) -> bool:
         """returns true if path is a symbolic link"""
@@ -81,7 +81,7 @@ class RemoteConfig(_BaseConfig):
         result = self.connection.run(f"test -d {path}", warn=True)
         if not result.ok:
             msg = f"{path} is not a directory"
-            raise InvalidPath(msg)
+            raise InvalidPathError(msg)
 
     def _is_directory(self, path) -> bool:
         result = self.connection.run(f"test -d {path}", warn=True)
@@ -92,14 +92,14 @@ class RemoteConfig(_BaseConfig):
         :returns: The Path string of the directory where the new backup will be
         written.
         :raises:
-            InvalidPath: If the destination directory already exists
+            InvalidPathError: If the destination directory already exists
         """
         time_stamp = get_time_stamp()
         new_backup_dir = f"{self.destination_dir}/{time_stamp}"
         exists = self._is_directory(new_backup_dir) or self.file_exists(new_backup_dir)
         if exists:
             msg = f"{new_backup_dir} already exists and will get overwritten"
-            raise InvalidPath(msg)
+            raise InvalidPathError(msg)
         else:
             return str(new_backup_dir)
 

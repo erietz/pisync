@@ -121,6 +121,8 @@ ignore = [
   "S105", "S106", "S107",
   # Ignore complexity
   "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+  # I do not know how to fix this `subprocess` call: check for execution of untrusted input
+  "S603"
 ]
 unfixable = [
   # Don't touch unused imports

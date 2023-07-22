@@ -47,7 +47,7 @@ create the necessary symlink at {config.link_dir}.
         logging.info(f"Starting incremental backup from {config.resolve(config.link_dir)}")
     else:
         logging.info(f"No previous backup found at {config.destination_dir}")
-        logging.info(f"Starting a fresh complete backup from {config.source_dir} " "to {config.destination_dir}")
+        logging.info(f"Starting a fresh complete backup from {config.source_dir} to {config.destination_dir}")
 
     rsync_command = config.get_rsync_command(latest_backup_path, previous_backup_exists=prev_backup_exists)
 

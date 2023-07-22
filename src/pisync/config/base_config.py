@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 
-class InvalidPath(Exception):
+class InvalidPathError(Exception):
     pass
 
 
@@ -48,7 +48,7 @@ class _BaseConfig(ABC):
         """
         :returns: The Path object from the input path str
         :raises:
-            InvalidPath: If path does not exist or is not a directory
+            InvalidPathError: If path does not exist or is not a directory
         """
         pass
 
@@ -58,7 +58,7 @@ class _BaseConfig(ABC):
         :returns: The Path string of the directory where the new backup will be
         written.
         :raises:
-            InvalidPath: If the destination directory already exists
+            InvalidPathError: If the destination directory already exists
         """
         pass
 
