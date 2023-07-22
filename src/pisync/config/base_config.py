@@ -63,5 +63,5 @@ class _BaseConfig(ABC):
         pass
 
     @abstractmethod
-    def get_rsync_command(self, new_backup_dir: str, previous_backup_exists: bool = False):
+    def get_rsync_command(self, new_backup_dir: str, previous_backup_exists: bool):
         pass

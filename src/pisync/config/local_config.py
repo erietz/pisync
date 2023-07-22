@@ -63,7 +63,7 @@ class LocalConfig(_BaseConfig):
         else:
             return str(new_backup_dir)
 
-    def get_rsync_command(self, new_backup_dir: str, previous_backup_exists: bool = False) -> List[str]:
+    def get_rsync_command(self, new_backup_dir: str, previous_backup_exists: bool) -> List[str]:
         destination = new_backup_dir
         source = self.source_dir
         link_dest = self.link_dir
