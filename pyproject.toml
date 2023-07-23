@@ -139,6 +139,9 @@ ban-relative-imports = "all"
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
 
+# allow print statement in example script
+"./examples/run_backups.py" = ["T201"]
+
 [tool.coverage.run]
 source_pkgs = ["pisync", "tests"]
 branch = true

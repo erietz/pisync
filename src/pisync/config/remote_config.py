@@ -14,7 +14,7 @@ class RemoteConfig(_BaseConfig):
         source_dir: str,
         destination_dir: str,
         exclude_file_patterns: Optional[List[str]] = None,
-        log_file: str = Path.home() / ".local/share/backup/rsync-backups.log",
+        log_file: str | None = None,
     ):
         self.user_at_hostname = user_at_hostname
         self.connection: Connection = Connection(user_at_hostname)
@@ -23,7 +23,10 @@ class RemoteConfig(_BaseConfig):
         self.source_dir = source_dir
         self.destination_dir = destination_dir
         self.exclude_file_patterns = exclude_file_patterns
-        self.log_file = log_file
+        if log_file is None:
+            self.log_file = str(Path.home() / ".local/share/backup/rsync-backups.log")
+        else:
+            self.log_file = log_file
         self.link_dir = f"{self.destination_dir}/latest"
         self._optionless_rsync_arguments = [
             "--delete",  # delete extraneous files from dest dirs

@@ -2,6 +2,6 @@ from datetime import datetime
 
 
 def get_time_stamp() -> str:
-    now = datetime.now()
+    now = datetime.now().astimezone()
     stamp = now.strftime("%Y-%m-%d-%H-%M-%S")
     return str(stamp)
