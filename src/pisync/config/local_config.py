@@ -1,11 +1,11 @@
 from pathlib import Path
 from typing import List, Optional
 
-from pisync.config.base_config import InvalidPathError, _BaseConfig
+from pisync.config.base_config import BackupType, BaseConfig, InvalidPathError
 from pisync.util import get_time_stamp
 
 
-class LocalConfig(_BaseConfig):
+class LocalConfig(BaseConfig):
     def __init__(
         self,
         source_dir: str,
@@ -29,10 +29,10 @@ class LocalConfig(_BaseConfig):
             "--verbose",  # increase verbosity
         ]
 
-    def is_symlink(self, path: str) -> bool:
+    def is_symlink(self, path: str) -> BackupType:
         return Path(path).is_symlink()
 
-    def file_exists(self, path: str) -> bool:
+    def file_exists(self, path: str) -> BackupType:
         return Path(path).exists()
 
     def unlink(self, path: str) -> None:
@@ -45,7 +45,7 @@ class LocalConfig(_BaseConfig):
         """Make the path absolute, resolving any symlinks."""
         return str(Path(path).resolve())
 
-    def is_empty_directory(self, path: str) -> bool:
+    def is_empty_directory(self, path: str) -> BackupType:
         return not any(Path(path).iterdir())
 
     def ensure_dir_exists(self, path: str):
@@ -66,13 +66,13 @@ class LocalConfig(_BaseConfig):
         else:
             return str(new_backup_dir)
 
-    def get_rsync_command(self, new_backup_dir: str, previous_backup_exists: bool) -> List[str]:
+    def get_rsync_command(self, new_backup_dir: str, backup_method: BackupType) -> List[str]:
         destination = new_backup_dir
         source = self.source_dir
         link_dest = self.link_dir
         option_arguments = []
 
-        if previous_backup_exists:
+        if backup_method == BackupType.Incremental:
             option_arguments.append(f"--link-dest={link_dest}")
 
         if self.exclude_file_patterns is not None:

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import List
 
 
@@ -6,7 +7,12 @@ class InvalidPathError(Exception):
     pass
 
 
-class _BaseConfig(ABC):
+class BackupType(Enum):
+    Complete = 1
+    Incremental = 2
+
+
+class BaseConfig(ABC):
     source_dir: str
     destination_dir: str
     exclude_file_patterns: List[str]
@@ -14,17 +20,17 @@ class _BaseConfig(ABC):
     link_dir: str
 
     @abstractmethod
-    def is_symlink(self, path: str) -> bool:
+    def is_symlink(self, path: str) -> BackupType:
         """returns true if path is a symbolic link"""
         pass
 
     @abstractmethod
-    def is_empty_directory(self, path: str) -> bool:
+    def is_empty_directory(self, path: str) -> BackupType:
         """returns true if path is a directory and contains no files"""
         pass
 
     @abstractmethod
-    def file_exists(self, path: str) -> bool:
+    def file_exists(self, path: str) -> BackupType:
         """returns true if the file or directory exists"""
         pass
 
@@ -63,5 +69,5 @@ class _BaseConfig(ABC):
         pass
 
     @abstractmethod
-    def get_rsync_command(self, new_backup_dir: str, previous_backup_exists: bool):
+    def get_rsync_command(self, new_backup_dir: str, backup_method: BackupType):
         pass

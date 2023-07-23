@@ -4,7 +4,7 @@ from typing import Tuple
 
 import pytest
 
-from pisync.config import InvalidPathError, RemoteConfig
+from pisync.config import BackupType, InvalidPathError, RemoteConfig
 from pisync.util import get_time_stamp
 
 
@@ -54,7 +54,7 @@ class TestGetRsyncCommand:
     def test_no_previous_backup(self, home_tmp_config, optionless_arguments, user_at_localhost):
         home, tmp, config = home_tmp_config
         new_backup_dir = config.generate_new_backup_dir_path()
-        rsync_cmd = config.get_rsync_command(new_backup_dir, previous_backup_exists=False)
+        rsync_cmd = config.get_rsync_command(new_backup_dir, backup_method=BackupType.Complete)
 
         # For example: /tmp/2023-07-14-17-24-23
         assert new_backup_dir.startswith(str(tmp.parts[0]))
@@ -63,7 +63,7 @@ class TestGetRsyncCommand:
     def test_previous_backup_exists(self, home_tmp_config, optionless_arguments, user_at_localhost):
         home, tmp, config = home_tmp_config
         new_backup_dir = config.generate_new_backup_dir_path()
-        rsync_cmd = config.get_rsync_command(new_backup_dir, previous_backup_exists=True)
+        rsync_cmd = config.get_rsync_command(new_backup_dir, backup_method=BackupType.Incremental)
 
         # For example: /tmp/2023-07-14-17-24-23
         assert new_backup_dir.startswith(str(tmp.parts[0]))
@@ -79,7 +79,7 @@ class TestGetRsyncCommand:
         exclude_file_patterns = ["/exclude/path1", "/exclude/path2", "/exclude/path3/**/*.bak"]
         config = RemoteConfig(user_at_localhost, home, tmp, exclude_file_patterns)
         new_backup_dir = config.generate_new_backup_dir_path()
-        rsync_cmd = config.get_rsync_command(new_backup_dir, previous_backup_exists=False)
+        rsync_cmd = config.get_rsync_command(new_backup_dir, backup_method=BackupType.Complete)
 
         # For example: /tmp/2023-07-14-17-24-23
         assert new_backup_dir.startswith(str(tmp.parts[0]))

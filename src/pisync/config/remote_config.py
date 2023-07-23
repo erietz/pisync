@@ -3,11 +3,11 @@ from typing import List, Optional
 
 from fabric import Connection
 
-from pisync.config.base_config import InvalidPathError, _BaseConfig
+from pisync.config.base_config import BackupType, BaseConfig, InvalidPathError
 from pisync.util import get_time_stamp
 
 
-class RemoteConfig(_BaseConfig):
+class RemoteConfig(BaseConfig):
     def __init__(
         self,
         user_at_hostname: str,
@@ -47,17 +47,17 @@ class RemoteConfig(_BaseConfig):
             msg = f"{path} is not a directory"
             raise InvalidPathError(msg)
 
-    def is_symlink(self, path: str) -> bool:
+    def is_symlink(self, path: str) -> BackupType:
         """returns true if path is a symbolic link"""
         result = self.connection.run(f"test -L {path}", warn=True)
         return result.ok
 
-    def is_empty_directory(self, path: str) -> bool:
+    def is_empty_directory(self, path: str) -> BackupType:
         """returns true if path is a directory and contains no files"""
         result = self.connection.run(f'test -n "$(find {path} -maxdepth 0 -empty)"', warn=True)
         return result.ok
 
-    def file_exists(self, path: str) -> bool:
+    def file_exists(self, path: str) -> BackupType:
         """returns true if the file or directory exists"""
         return (
             self.connection.run(f"test -d {path}", warn=True).ok or self.connection.run(f"test -f {path}", warn=True).ok
@@ -86,7 +86,7 @@ class RemoteConfig(_BaseConfig):
             msg = f"{path} is not a directory"
             raise InvalidPathError(msg)
 
-    def _is_directory(self, path) -> bool:
+    def _is_directory(self, path) -> BackupType:
         result = self.connection.run(f"test -d {path}", warn=True)
         return result.ok
 
@@ -106,13 +106,13 @@ class RemoteConfig(_BaseConfig):
         else:
             return str(new_backup_dir)
 
-    def get_rsync_command(self, new_backup_dir: str, previous_backup_exists: bool) -> List[str]:
+    def get_rsync_command(self, new_backup_dir: str, backup_method: BackupType) -> List[str]:
         destination = f"{self.user_at_hostname}:{new_backup_dir}"
         source = self.source_dir
         link_dest = self.link_dir
         option_arguments = []
 
-        if previous_backup_exists:
+        if backup_method == BackupType.Incremental:
             option_arguments.append(f"--link-dest={link_dest}")
 
         if self.exclude_file_patterns is not None:
