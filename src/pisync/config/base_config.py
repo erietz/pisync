@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 
 class InvalidPathError(Exception):
@@ -15,7 +15,7 @@ class BackupType(Enum):
 class BaseConfig(ABC):
     source_dir: str
     destination_dir: str
-    exclude_file_patterns: List[str] | None
+    exclude_file_patterns: Optional[List[str]]
     log_file: str
     link_dir: str
 

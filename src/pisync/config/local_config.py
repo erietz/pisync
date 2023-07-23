@@ -11,7 +11,7 @@ class LocalConfig(BaseConfig):
         source_dir: str,
         destination_dir: str,
         exclude_file_patterns: Optional[List[str]] = None,
-        log_file: str | None = None,
+        log_file: Optional[str] = None,
     ):
         self.ensure_dir_exists(source_dir)
         self.ensure_dir_exists(destination_dir)

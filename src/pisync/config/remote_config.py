@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from fabric import Connection
 
@@ -13,8 +13,8 @@ class RemoteConfig(BaseConfig):
         user_at_hostname: str,
         source_dir: str,
         destination_dir: str,
-        exclude_file_patterns: List[str] | None = None,
-        log_file: str | None = None,
+        exclude_file_patterns: Optional[List[str]] = None,
+        log_file: Optional[str] = None,
     ):
         self.user_at_hostname = user_at_hostname
         self.connection: Connection = Connection(user_at_hostname)
