@@ -1,15 +1,21 @@
 from abc import ABC, abstractmethod
-from typing import List
+from enum import Enum
+from typing import List, Optional
 
 
-class InvalidPath(Exception):
+class InvalidPathError(Exception):
     pass
 
 
-class _BaseConfig(ABC):
+class BackupType(Enum):
+    Complete = 1
+    Incremental = 2
+
+
+class BaseConfig(ABC):
     source_dir: str
     destination_dir: str
-    exclude_file_patterns: List[str]
+    exclude_file_patterns: Optional[List[str]]
     log_file: str
     link_dir: str
 
@@ -44,11 +50,11 @@ class _BaseConfig(ABC):
         pass
 
     @abstractmethod
-    def ensure_dir_exists(self, path: str):
+    def ensure_dir_exists(self, path: str) -> None:
         """
         :returns: The Path object from the input path str
         :raises:
-            InvalidPath: If path does not exist or is not a directory
+            InvalidPathError: If path does not exist or is not a directory
         """
         pass
 
@@ -58,10 +64,10 @@ class _BaseConfig(ABC):
         :returns: The Path string of the directory where the new backup will be
         written.
         :raises:
-            InvalidPath: If the destination directory already exists
+            InvalidPathError: If the destination directory already exists
         """
         pass
 
     @abstractmethod
-    def get_rsync_command(self, new_backup_dir: str, previous_backup_exists: bool = False):
+    def get_rsync_command(self, new_backup_dir: str, backup_method: BackupType):
         pass

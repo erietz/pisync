@@ -16,10 +16,10 @@ import time
 from pathlib import Path
 from typing import List
 
-from pisync.config.base_config import _BaseConfig
+from pisync.config.base_config import BackupType, BaseConfig
 
 
-def backup(config: _BaseConfig) -> str:
+def backup(config: BaseConfig) -> str:
     """
     Returns the path to the latest backup directory
     """
@@ -44,12 +44,14 @@ create the necessary symlink at {config.link_dir}.
         raise Exception(msg)
 
     if prev_backup_exists:
+        backup_method = BackupType.Incremental
         logging.info(f"Starting incremental backup from {config.resolve(config.link_dir)}")
     else:
+        backup_method = BackupType.Complete
         logging.info(f"No previous backup found at {config.destination_dir}")
-        logging.info(f"Starting a fresh complete backup from {config.source_dir} " "to {config.destination_dir}")
+        logging.info(f"Starting a fresh complete backup from {config.source_dir} to {config.destination_dir}")
 
-    rsync_command = config.get_rsync_command(latest_backup_path, previous_backup_exists=prev_backup_exists)
+    rsync_command = config.get_rsync_command(latest_backup_path, backup_method=backup_method)
 
     exit_code = run_rsync(rsync_command)
 
@@ -61,21 +63,22 @@ create the necessary symlink at {config.link_dir}.
         logging.info(f"Symlink created from {latest_backup_path} to {config.link_dir}")
         return latest_backup_path
     else:
+        msg = f"Backup failed. Rsync exit code: {exit_code}"
+        logging.error(msg)
         # backup failed, we should delete the most recent backup
-        logging.error(f"Backup failed. Rsync exit code: {exit_code}")
         if config.file_exists(latest_backup_path):
             logging.info(f"Deleting failed backup at {latest_backup_path}")
             shutil.rmtree(latest_backup_path)
-        return None
+        raise Exception(msg)
 
 
 def configure_logging(filename: str):
-    filename = Path(filename)
-    if not filename.parent.exists():
-        filename.parent.mkdir(parents=True)
+    _filename = Path(filename)
+    if not _filename.parent.exists():
+        _filename.parent.mkdir(parents=True)
 
     logging.basicConfig(
-        filename=str(filename.resolve()),
+        filename=str(_filename.resolve()),
         filemode="a",
         format="%(levelname)s\t%(asctime)s\t%(message)s",
         datefmt="%m/%d/%Y %I:%M:%S %p",

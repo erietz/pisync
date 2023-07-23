@@ -3,18 +3,18 @@ from typing import List, Optional
 
 from fabric import Connection
 
-from pisync.config.base_config import InvalidPath, _BaseConfig
+from pisync.config.base_config import BackupType, BaseConfig, InvalidPathError
 from pisync.util import get_time_stamp
 
 
-class RemoteConfig(_BaseConfig):
+class RemoteConfig(BaseConfig):
     def __init__(
         self,
         user_at_hostname: str,
         source_dir: str,
         destination_dir: str,
         exclude_file_patterns: Optional[List[str]] = None,
-        log_file: str = Path.home() / ".local/share/backup/rsync-backups.log",
+        log_file: Optional[str] = None,
     ):
         self.user_at_hostname = user_at_hostname
         self.connection: Connection = Connection(user_at_hostname)
@@ -23,7 +23,10 @@ class RemoteConfig(_BaseConfig):
         self.source_dir = source_dir
         self.destination_dir = destination_dir
         self.exclude_file_patterns = exclude_file_patterns
-        self.log_file = log_file
+        if log_file is None:
+            self.log_file = str(Path.home() / ".local/share/backup/rsync-backups.log")
+        else:
+            self.log_file = log_file
         self.link_dir = f"{self.destination_dir}/latest"
         self._optionless_rsync_arguments = [
             "--delete",  # delete extraneous files from dest dirs
@@ -36,13 +39,13 @@ class RemoteConfig(_BaseConfig):
         ]
 
     def _ensure_dir_exists_locally(self, path: str):
-        path = Path(path)
-        if not path.exists():
-            msg = f"{path} does not exist"
-            raise InvalidPath(msg)
-        if not path.is_dir():
-            msg = f"{path} is not a directory"
-            raise InvalidPath(msg)
+        _path = Path(path)
+        if not _path.exists():
+            msg = f"{_path} does not exist"
+            raise InvalidPathError(msg)
+        if not _path.is_dir():
+            msg = f"{_path} is not a directory"
+            raise InvalidPathError(msg)
 
     def is_symlink(self, path: str) -> bool:
         """returns true if path is a symbolic link"""
@@ -77,13 +80,13 @@ class RemoteConfig(_BaseConfig):
         result = self.connection.run(f"realpath {path}", warn=True)
         return result.stdout.strip()
 
-    def ensure_dir_exists(self, path: str) -> str:
+    def ensure_dir_exists(self, path: str) -> None:
         result = self.connection.run(f"test -d {path}", warn=True)
         if not result.ok:
             msg = f"{path} is not a directory"
-            raise InvalidPath(msg)
+            raise InvalidPathError(msg)
 
-    def _is_directory(self, path) -> bool:
+    def _is_directory(self, path) -> BackupType:
         result = self.connection.run(f"test -d {path}", warn=True)
         return result.ok
 
@@ -92,24 +95,24 @@ class RemoteConfig(_BaseConfig):
         :returns: The Path string of the directory where the new backup will be
         written.
         :raises:
-            InvalidPath: If the destination directory already exists
+            InvalidPathError: If the destination directory already exists
         """
         time_stamp = get_time_stamp()
         new_backup_dir = f"{self.destination_dir}/{time_stamp}"
         exists = self._is_directory(new_backup_dir) or self.file_exists(new_backup_dir)
         if exists:
             msg = f"{new_backup_dir} already exists and will get overwritten"
-            raise InvalidPath(msg)
+            raise InvalidPathError(msg)
         else:
             return str(new_backup_dir)
 
-    def get_rsync_command(self, new_backup_dir: str, previous_backup_exists: bool = False) -> List[str]:
+    def get_rsync_command(self, new_backup_dir: str, backup_method: BackupType) -> List[str]:
         destination = f"{self.user_at_hostname}:{new_backup_dir}"
         source = self.source_dir
         link_dest = self.link_dir
         option_arguments = []
 
-        if previous_backup_exists:
+        if backup_method == BackupType.Incremental:
             option_arguments.append(f"--link-dest={link_dest}")
 
         if self.exclude_file_patterns is not None:
