@@ -2,10 +2,6 @@
 Author      : Ethan Rietz
 Date        : 2022-05-23
 Description : Incremental backups script using rsync.
-
-Notes:
-
-https://linuxconfig.org/how-to-create-incremental-backups-using-rsync-on-linux
 """
 
 import logging
@@ -68,7 +64,7 @@ create the necessary symlink at {config.link_dir}.
         # backup failed, we should delete the most recent backup
         if config.file_exists(latest_backup_path):
             logging.info(f"Deleting failed backup at {latest_backup_path}")
-            shutil.rmtree(latest_backup_path)
+            config.rmtree(latest_backup_path)
         raise Exception(msg)
 
 

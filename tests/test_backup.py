@@ -7,16 +7,6 @@ from time import sleep
 from pisync.backup import backup, run_rsync
 from pisync.config import LocalConfig
 
-# class UtilityFunctionTests(unittest.TestCase):
-#     def test_directory_is_empty(self):
-#         with tempfile.TemporaryDirectory() as tmp:
-#             tmp_dir = Path(tmp)
-#             self.assertTrue(directory_is_empty(tmp_dir))
-
-#            new_file = tmp_dir / "new-file-name-here.txt"
-#            new_file.touch()
-#            self.assertFalse(directory_is_empty(tmp_dir))
-
 
 class RunRsyncTests(unittest.TestCase):
     def test_fake_command_exit_zero(self):
