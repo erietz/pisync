@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 from fabric import Connection
 
@@ -13,7 +13,7 @@ class RemoteConfig(BaseConfig):
         user_at_hostname: str,
         source_dir: str,
         destination_dir: str,
-        exclude_file_patterns: Optional[List[str]] = None,
+        exclude_file_patterns: List[str] | None = None,
         log_file: str | None = None,
     ):
         self.user_at_hostname = user_at_hostname
@@ -39,25 +39,25 @@ class RemoteConfig(BaseConfig):
         ]
 
     def _ensure_dir_exists_locally(self, path: str):
-        path = Path(path)
-        if not path.exists():
-            msg = f"{path} does not exist"
+        _path = Path(path)
+        if not _path.exists():
+            msg = f"{_path} does not exist"
             raise InvalidPathError(msg)
-        if not path.is_dir():
-            msg = f"{path} is not a directory"
+        if not _path.is_dir():
+            msg = f"{_path} is not a directory"
             raise InvalidPathError(msg)
 
-    def is_symlink(self, path: str) -> BackupType:
+    def is_symlink(self, path: str) -> bool:
         """returns true if path is a symbolic link"""
         result = self.connection.run(f"test -L {path}", warn=True)
         return result.ok
 
-    def is_empty_directory(self, path: str) -> BackupType:
+    def is_empty_directory(self, path: str) -> bool:
         """returns true if path is a directory and contains no files"""
         result = self.connection.run(f'test -n "$(find {path} -maxdepth 0 -empty)"', warn=True)
         return result.ok
 
-    def file_exists(self, path: str) -> BackupType:
+    def file_exists(self, path: str) -> bool:
         """returns true if the file or directory exists"""
         return (
             self.connection.run(f"test -d {path}", warn=True).ok or self.connection.run(f"test -f {path}", warn=True).ok
@@ -80,7 +80,7 @@ class RemoteConfig(BaseConfig):
         result = self.connection.run(f"realpath {path}", warn=True)
         return result.stdout.strip()
 
-    def ensure_dir_exists(self, path: str) -> str:
+    def ensure_dir_exists(self, path: str) -> None:
         result = self.connection.run(f"test -d {path}", warn=True)
         if not result.ok:
             msg = f"{path} is not a directory"

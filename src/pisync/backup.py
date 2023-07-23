@@ -63,21 +63,22 @@ create the necessary symlink at {config.link_dir}.
         logging.info(f"Symlink created from {latest_backup_path} to {config.link_dir}")
         return latest_backup_path
     else:
+        msg = f"Backup failed. Rsync exit code: {exit_code}"
+        logging.error(msg)
         # backup failed, we should delete the most recent backup
-        logging.error(f"Backup failed. Rsync exit code: {exit_code}")
         if config.file_exists(latest_backup_path):
             logging.info(f"Deleting failed backup at {latest_backup_path}")
             shutil.rmtree(latest_backup_path)
-        return None
+        raise Exception(msg)
 
 
 def configure_logging(filename: str):
-    filename = Path(filename)
-    if not filename.parent.exists():
-        filename.parent.mkdir(parents=True)
+    _filename = Path(filename)
+    if not _filename.parent.exists():
+        _filename.parent.mkdir(parents=True)
 
     logging.basicConfig(
-        filename=str(filename.resolve()),
+        filename=str(_filename.resolve()),
         filemode="a",
         format="%(levelname)s\t%(asctime)s\t%(message)s",
         datefmt="%m/%d/%Y %I:%M:%S %p",

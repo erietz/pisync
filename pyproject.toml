@@ -60,6 +60,8 @@ dependencies = [
   "black>=23.1.0",
   "mypy>=1.0.0",
   "ruff>=0.0.243",
+  "pytest",
+  "pisync"
 ]
 [tool.hatch.envs.lint.scripts]
 typing = "mypy --install-types --non-interactive {args:src/pisync tests}"
@@ -76,6 +78,12 @@ all = [
   "style",
   "typing",
 ]
+
+[[tool.mypy.overrides]]
+module = [
+	"fabric"
+]
+ignore_missing_imports = true
 
 [tool.black]
 target-version = ["py37"]

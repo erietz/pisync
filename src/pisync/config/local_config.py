@@ -29,10 +29,10 @@ class LocalConfig(BaseConfig):
             "--verbose",  # increase verbosity
         ]
 
-    def is_symlink(self, path: str) -> BackupType:
+    def is_symlink(self, path: str) -> bool:
         return Path(path).is_symlink()
 
-    def file_exists(self, path: str) -> BackupType:
+    def file_exists(self, path: str) -> bool:
         return Path(path).exists()
 
     def unlink(self, path: str) -> None:
@@ -45,16 +45,16 @@ class LocalConfig(BaseConfig):
         """Make the path absolute, resolving any symlinks."""
         return str(Path(path).resolve())
 
-    def is_empty_directory(self, path: str) -> BackupType:
+    def is_empty_directory(self, path: str) -> bool:
         return not any(Path(path).iterdir())
 
     def ensure_dir_exists(self, path: str):
-        path = Path(path)
-        if not path.exists():
-            msg = f"{path} does not exist"
+        _path = Path(path)
+        if not _path.exists():
+            msg = f"{_path} does not exist"
             raise InvalidPathError(msg)
-        if not path.is_dir():
-            msg = f"{path} is not a directory"
+        if not _path.is_dir():
+            msg = f"{_path} is not a directory"
             raise InvalidPathError(msg)
 
     def generate_new_backup_dir_path(self) -> str:

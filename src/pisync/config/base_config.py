@@ -15,22 +15,22 @@ class BackupType(Enum):
 class BaseConfig(ABC):
     source_dir: str
     destination_dir: str
-    exclude_file_patterns: List[str]
+    exclude_file_patterns: List[str] | None
     log_file: str
     link_dir: str
 
     @abstractmethod
-    def is_symlink(self, path: str) -> BackupType:
+    def is_symlink(self, path: str) -> bool:
         """returns true if path is a symbolic link"""
         pass
 
     @abstractmethod
-    def is_empty_directory(self, path: str) -> BackupType:
+    def is_empty_directory(self, path: str) -> bool:
         """returns true if path is a directory and contains no files"""
         pass
 
     @abstractmethod
-    def file_exists(self, path: str) -> BackupType:
+    def file_exists(self, path: str) -> bool:
         """returns true if the file or directory exists"""
         pass
 
@@ -50,7 +50,7 @@ class BaseConfig(ABC):
         pass
 
     @abstractmethod
-    def ensure_dir_exists(self, path: str):
+    def ensure_dir_exists(self, path: str) -> None:
         """
         :returns: The Path object from the input path str
         :raises:
