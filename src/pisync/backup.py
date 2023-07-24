@@ -15,6 +15,10 @@ from typing import List
 from pisync.config.base_config import BackupType, BaseConfig
 
 
+class BackupFailedError(Exception):
+    pass
+
+
 def backup(config: BaseConfig) -> str:
     """
     Returns the path to the latest backup directory
@@ -37,7 +41,7 @@ Make sure that {config.destination_dir} is empty or manually
 create the necessary symlink at {config.link_dir}.
 """
         logging.error(msg)
-        raise Exception(msg)
+        raise BackupFailedError(msg)
 
     if prev_backup_exists:
         backup_method = BackupType.Incremental
@@ -65,7 +69,7 @@ create the necessary symlink at {config.link_dir}.
         if config.file_exists(latest_backup_path):
             logging.info(f"Deleting failed backup at {latest_backup_path}")
             config.rmtree(latest_backup_path)
-        raise Exception(msg)
+        raise BackupFailedError(msg)
 
 
 def configure_logging(filename: str):

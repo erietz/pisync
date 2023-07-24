@@ -98,7 +98,7 @@ class RemoteConfig(BaseConfig):
         """
         time_stamp = get_time_stamp()
         new_backup_dir = f"{self.destination_dir}/{time_stamp}"
-        exists = self._is_directory(new_backup_dir) or self.file_exists(new_backup_dir)
+        exists = self._is_directory(new_backup_dir)
         if exists:
             msg = f"{new_backup_dir} already exists and will get overwritten"
             raise InvalidPathError(msg)
