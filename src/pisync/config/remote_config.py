@@ -49,13 +49,11 @@ class RemoteConfig(BaseConfig):
 
     def is_symlink(self, path: str) -> bool:
         """returns true if path is a symbolic link"""
-        result = self.connection.run(f"test -L {path}", warn=True)
-        return result.ok
+        return self.connection.run(f"test -L {path}", warn=True).ok
 
     def is_empty_directory(self, path: str) -> bool:
         """returns true if path is a directory and contains no files"""
-        result = self.connection.run(f'test -n "$(find {path} -maxdepth 0 -empty)"', warn=True)
-        return result.ok
+        return self.connection.run(f'test -n "$(find {path} -maxdepth 0 -empty)"', warn=True).ok
 
     def file_exists(self, path: str) -> bool:
         """returns true if the file or directory exists"""
@@ -70,15 +68,17 @@ class RemoteConfig(BaseConfig):
             msg = f"Failed to remove {path}"
             raise FileNotFoundError(msg)
 
+    def rmtree(self, path: str) -> None:
+        """Recursively delete directory tree"""
+        return self.connection.run(f"rm -r {path}").ok
+
     def symlink_to(self, symlink: str, file: str) -> None:
         """Make symlink a symbolic link to file."""
-        result = self.connection.run(f"ln -s {file} {symlink}", warn=True)
-        return result.ok
+        return self.connection.run(f"ln -s {file} {symlink}", warn=True).ok
 
     def resolve(self, path: str) -> str:
         """Make the path absolute, resolving any symlinks."""
-        result = self.connection.run(f"realpath {path}", warn=True)
-        return result.stdout.strip()
+        return self.connection.run(f"realpath {path}", warn=True).stdout.rstrip()
 
     def ensure_dir_exists(self, path: str) -> None:
         result = self.connection.run(f"test -d {path}", warn=True)
@@ -86,9 +86,8 @@ class RemoteConfig(BaseConfig):
             msg = f"{path} is not a directory"
             raise InvalidPathError(msg)
 
-    def _is_directory(self, path) -> BackupType:
-        result = self.connection.run(f"test -d {path}", warn=True)
-        return result.ok
+    def _is_directory(self, path) -> bool:
+        return self.connection.run(f"test -d {path}", warn=True).ok
 
     def generate_new_backup_dir_path(self) -> str:
         """
@@ -99,7 +98,7 @@ class RemoteConfig(BaseConfig):
         """
         time_stamp = get_time_stamp()
         new_backup_dir = f"{self.destination_dir}/{time_stamp}"
-        exists = self._is_directory(new_backup_dir) or self.file_exists(new_backup_dir)
+        exists = self._is_directory(new_backup_dir)
         if exists:
             msg = f"{new_backup_dir} already exists and will get overwritten"
             raise InvalidPathError(msg)

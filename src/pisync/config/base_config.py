@@ -40,6 +40,11 @@ class BaseConfig(ABC):
         pass
 
     @abstractmethod
+    def rmtree(self, path: str) -> None:
+        """Recursively delete directory tree"""
+        pass
+
+    @abstractmethod
     def symlink_to(self, symlink: str, file: str) -> None:
         """Make symlink a symbolic link to file."""
         pass

@@ -184,7 +184,7 @@ class TestPathOperations:
     ):
         config = RemoteConfig(user_at_localhost, scratch_file_system, tmp_path)
         time_stamp = get_time_stamp()
-        (tmp_path / time_stamp).touch()
+        (tmp_path / time_stamp).mkdir()
 
         with pytest.raises(InvalidPathError):
             _ = config.generate_new_backup_dir_path()

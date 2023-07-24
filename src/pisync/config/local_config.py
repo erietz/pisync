@@ -1,4 +1,5 @@
 from pathlib import Path
+from shutil import rmtree
 from typing import List, Optional
 
 from pisync.config.base_config import BackupType, BaseConfig, InvalidPathError
@@ -37,6 +38,10 @@ class LocalConfig(BaseConfig):
 
     def unlink(self, path: str) -> None:
         Path(path).unlink()
+
+    def rmtree(self, path: str) -> None:
+        """Recursively delete directory tree"""
+        rmtree(path)
 
     def symlink_to(self, symlink: str, file: str) -> None:
         Path(symlink).symlink_to(file)

@@ -1,22 +1,17 @@
-"""
-Author      : Ethan Rietz
-Date        : 2022-05-23
-Description : Incremental backups script using rsync.
-
-Notes:
-
-https://linuxconfig.org/how-to-create-incremental-backups-using-rsync-on-linux
-"""
-
 import logging
 import shutil
 import subprocess
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import List
 
 from pisync.config.base_config import BackupType, BaseConfig
+
+
+class BackupFailedError(Exception):
+    pass
 
 
 def backup(config: BaseConfig) -> str:
@@ -41,7 +36,7 @@ Make sure that {config.destination_dir} is empty or manually
 create the necessary symlink at {config.link_dir}.
 """
         logging.error(msg)
-        raise Exception(msg)
+        raise BackupFailedError(msg)
 
     if prev_backup_exists:
         backup_method = BackupType.Incremental
@@ -68,8 +63,14 @@ create the necessary symlink at {config.link_dir}.
         # backup failed, we should delete the most recent backup
         if config.file_exists(latest_backup_path):
             logging.info(f"Deleting failed backup at {latest_backup_path}")
-            shutil.rmtree(latest_backup_path)
-        raise Exception(msg)
+            config.rmtree(latest_backup_path)
+        raise BackupFailedError(msg)
+
+
+def get_time_stamp() -> str:
+    now = datetime.now().astimezone()
+    stamp = now.strftime("%Y-%m-%d-%H-%M-%S")
+    return str(stamp)
 
 
 def configure_logging(filename: str):
