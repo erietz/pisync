@@ -53,7 +53,7 @@ class RemoteConfig(BaseConfig):
 
     def is_empty_directory(self, path: str) -> bool:
         """returns true if path is a directory and contains no files"""
-        return self.connection.run(f'test -n "$(find {path} -maxdepth 0 -empty)"', warn=True).ok
+        return self.connection.run(f'test -z "$(ls -A {path})"', warn=True).ok
 
     def file_exists(self, path: str) -> bool:
         """returns true if the file or directory exists"""
