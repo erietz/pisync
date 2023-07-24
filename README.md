@@ -1,3 +1,5 @@
+![](https://img.shields.io/pypi/v/pisync)
+
 `pisync` is a simple library to aid in writing incremental backup scripts to
 local or remote machines. The only dependencies are [rsync][rsync],
 [python][python] >= v3.6, [fabric][fabric], and ssh keys copied over to a unix
