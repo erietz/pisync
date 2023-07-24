@@ -1,14 +1,9 @@
-"""
-Author      : Ethan Rietz
-Date        : 2022-05-23
-Description : Incremental backups script using rsync.
-"""
-
 import logging
 import shutil
 import subprocess
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import List
 
@@ -70,6 +65,12 @@ create the necessary symlink at {config.link_dir}.
             logging.info(f"Deleting failed backup at {latest_backup_path}")
             config.rmtree(latest_backup_path)
         raise BackupFailedError(msg)
+
+
+def get_time_stamp() -> str:
+    now = datetime.now().astimezone()
+    stamp = now.strftime("%Y-%m-%d-%H-%M-%S")
+    return str(stamp)
 
 
 def configure_logging(filename: str):

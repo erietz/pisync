@@ -8,8 +8,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pisync.backup import BackupFailedError, backup, run_rsync
 from pisync.config import LocalConfig, RemoteConfig
+from pisync.util import BackupFailedError, backup, run_rsync
 
 
 @pytest.fixture
@@ -99,7 +99,7 @@ class BackupTests(unittest.TestCase):
         self.assertNotIn(second_backup_path / self.src_dir_path.name / file_names[3], files_in_second_backup)
 
 
-@patch("pisync.backup.run_rsync", Mock(return_value=1))
+@patch("pisync.util.run_rsync", Mock(return_value=1))
 def test_local_backup_rsync_fails_removes_previous_failed_backup(tmp_path):
     source_dir = tmp_path / "source"
     dest_dir = tmp_path / "dest"
@@ -117,7 +117,7 @@ def test_local_backup_rsync_fails_removes_previous_failed_backup(tmp_path):
         assert config.rmtree.called is True
 
 
-@patch("pisync.backup.run_rsync", Mock(return_value=1))
+@patch("pisync.util.run_rsync", Mock(return_value=1))
 def test_remote_backup_rsync_fails_removes_previous_failed_backup(tmp_path, user_at_localhost):
     source_dir = tmp_path / "source"
     dest_dir = tmp_path / "dest"
