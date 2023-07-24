@@ -38,7 +38,7 @@ backup(local_docs)
 backup(remote_docs)
 ```
 
-Also see [an example config](example config) for how I backup my home server
+Also see [an example config][example config] for how I backup my home server
 both locally and to an offsite [raspberry pi][pi].
 
 # Notes
