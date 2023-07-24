@@ -23,4 +23,5 @@ fmt:
 # 	python3 -m twine upload dist/*
 
 dist:
+	hatch build
 	hatch publish

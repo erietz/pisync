@@ -38,8 +38,8 @@ backup(local_docs)
 backup(remote_docs)
 ```
 
-Also see [an example config](./examples/run_backups.py) for how I backup my
-home server both locally and to an offsite [raspberry pi][pi].
+Also see [an example config](example config) for how I backup my home server
+both locally and to an offsite [raspberry pi][pi].
 
 # Notes
 
@@ -84,6 +84,7 @@ pip install -e .
 make test
 ```
 
+[example config]: https://github.com/erietz/pisync/blob/main/examples/run_backups.py
 [rsync]: https://github.com/WayneD/rsync
 [python]: https://www.python.org/
 [fabric]: https://github.com/fabric/fabric
