@@ -99,7 +99,6 @@ def run_rsync(rsync_command: List[str]) -> int:
 
     process = subprocess.Popen(rsync_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-
     # If the stdout argument was not PIPE, this attribute is None.
     if process.stdout is not None:
         for line in process.stdout:
