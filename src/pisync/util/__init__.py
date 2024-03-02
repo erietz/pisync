@@ -59,10 +59,10 @@ create the necessary symlink at {config.link_dir}.
         return latest_backup_path
     else:
         msg = f"Backup failed. Rsync exit code: {exit_code}"
-        logging.error(msg)
+        logging.fatal(msg)
         # backup failed, we should delete the most recent backup
         if config.file_exists(latest_backup_path):
-            logging.info(f"Deleting failed backup at {latest_backup_path}")
+            logging.fatal(f"Deleting failed backup at {latest_backup_path}")
             config.rmtree(latest_backup_path)
         raise BackupFailedError(msg)
 
@@ -98,9 +98,18 @@ def run_rsync(rsync_command: List[str]) -> int:
     start_time = time.perf_counter()
 
     process = subprocess.Popen(rsync_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+
+    # If the stdout argument was not PIPE, this attribute is None.
     if process.stdout is not None:
         for line in process.stdout:
             logging.info(f"RSYNC: {line.rstrip()}")
+
+    # If the stderr argument was not PIPE, this attribute is None.
+    if process.stderr is not None:
+        for line in process.stderr:
+            logging.error(f"RSYNC: {line.rstrip()}")
+
     return_code = process.wait()
 
     end_time = time.perf_counter()
