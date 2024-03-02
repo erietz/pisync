@@ -95,12 +95,15 @@ def enforce_system_requirements() -> None:
 
 def run_rsync(rsync_command: List[str]) -> int:
     logging.info(f"Running {rsync_command}")
-
     start_time = time.perf_counter()
-    process = subprocess.run(rsync_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    for line in process.stdout.decode().split("\n"):
-        logging.info(f"RSYNC: {line}")
+
+    process = subprocess.Popen(rsync_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if process.stdout is not None:
+        for line in process.stdout:
+            logging.info(f"RSYNC: {line.rstrip()}")
+    return_code = process.wait()
+
     end_time = time.perf_counter()
     logging.info(f"Time elapsed {end_time - start_time} seconds")
 
-    return process.returncode
+    return return_code
