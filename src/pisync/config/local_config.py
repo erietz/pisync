@@ -28,6 +28,7 @@ class LocalConfig(BaseConfig):
             "--delete",  # delete extraneous files from dest dirs
             "--archive",  # archive mode is -rlptgoD (no -A,-X,-U,-N,-H)
             "--verbose",  # increase verbosity
+            "--info=stats3",
         ]
 
     def is_symlink(self, path: str) -> bool:

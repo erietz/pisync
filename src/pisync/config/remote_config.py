@@ -36,6 +36,7 @@ class RemoteConfig(BaseConfig):
             # "--acls",       # preserve ACLs (implies --perms)
             # "--xattrs",     # preserve extended attributes
             "--verbose",  # increase verbosity
+            "--info=stats3",
         ]
 
     def _ensure_dir_exists_locally(self, path: str):

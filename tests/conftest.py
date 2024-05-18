@@ -9,6 +9,7 @@ def optionless_arguments():
         # "--acls",
         # "--xattrs",
         "--verbose",
+        "--info=stats3",
     ]
 
 
